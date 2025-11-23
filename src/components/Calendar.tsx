@@ -72,10 +72,10 @@ const Calendar: React.FC = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-3xl p-4 shadow-sm mb-6">
+    <div className="bg-white dark:bg-gray-800 rounded-3xl p-3 shadow-sm mb-6">
       {/* Header with Month/Year and Navigation */}
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-base md:text-lg font-bold">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-sm md:text-base font-bold">
           {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
         </h3>
         <div className="flex items-center gap-0.5">
@@ -97,12 +97,12 @@ const Calendar: React.FC = () => {
       </div>
 
       {/* Calendar Grid */}
-      <div className="grid grid-cols-7 gap-1.5 md:gap-2">
+      <div className="grid grid-cols-7 gap-1">
         {/* Day headers */}
         {daysOfWeek.map((day) => (
           <div
             key={day}
-            className="text-center text-xs font-medium text-gray-500 dark:text-gray-400 pb-1"
+            className="text-center text-[10px] font-medium text-gray-500 dark:text-gray-400 pb-0.5"
           >
             {day}
           </div>
@@ -114,7 +114,7 @@ const Calendar: React.FC = () => {
             key={index}
             onClick={() => day && handleDateClick(day)}
             className={`
-              aspect-square flex items-center justify-center text-xs md:text-sm font-medium rounded-full transition
+              aspect-square flex items-center justify-center text-[11px] md:text-xs font-medium rounded-full transition
               ${day ? 'cursor-pointer' : 'cursor-default'}
               ${day && isSelected(day)
                 ? 'bg-black dark:bg-white text-white dark:text-black scale-105'
