@@ -1,0 +1,551 @@
+import { useState, useMemo, useEffect } from 'react';
+import { Search, Bell, Wallet, TrendingUp, Plus, ChevronRight, X } from 'lucide-react';
+import { useCurrency } from '../contexts/CurrencyContext';
+import ModalWrapper from '../components/ModalWrapper';
+import TransactionForm from '../components/TransactionForm';
+import BudgetForm from '../components/BudgetForm';
+import ConfirmDialog from '../components/ConfirmDialog';
+
+interface Transaction {
+    id: number;
+    name: string;
+    date: string;
+    category: string;
+    amount: number;
+    icon: string;
+}
+
+interface BudgetCategory {
+    id: number;
+    name: string;
+    total: number;
+    icon: string;
+}
+
+const Finance = () => {
+    const [activeTab, setActiveTab] = useState<'overview' | 'transactions' | 'budget' | 'savings'>('overview');
+    const { formatAmount } = useCurrency();
+    const [showSearch, setShowSearch] = useState(false);
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [showAddTransaction, setShowAddTransaction] = useState(false);
+    const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+    const [transactionToDelete, setTransactionToDelete] = useState<number | null>(null);
+    const [showBudgetEdit, setShowBudgetEdit] = useState(false);
+
+    const tabs = [
+        { id: 'overview' as const, label: 'Overview' },
+        { id: 'transactions' as const, label: 'Transactions' },
+        { id: 'budget' as const, label: 'Budget' },
+        { id: 'savings' as const, label: 'Savings' },
+    ];
+
+    // Load transactions from localStorage or use default
+    const [transactions, setTransactions] = useState<Transaction[]>(() => {
+        const saved = localStorage.getItem('transactions');
+        return saved ? JSON.parse(saved) : [
+            { id: 1, name: 'Monday Dinner', date: '30/10/2025', category: 'Food & Dining', amount: -150, icon: '🍔' },
+            { id: 2, name: 'Rent', date: '01/11/2025', category: 'Housing & Rent', amount: -1500, icon: '🏠' },
+            { id: 3, name: 'Salary', date: '30/10/2025', category: 'Income', amount: 15000, icon: '💰' },
+            { id: 4, name: 'Friday Lunch', date: '15/11/2025', category: 'Food & Dining', amount: -560, icon: '🍔' },
+            { id: 5, name: 'Movie', date: '22/11/2025', category: 'Entertainment', amount: -250, icon: '🎬' },
+        ];
+    });
+
+    // Load budget categories from localStorage or use default
+    const [budgetCategories, setBudgetCategories] = useState<BudgetCategory[]>(() => {
+        const saved = localStorage.getItem('budgetCategories');
+        return saved ? JSON.parse(saved) : [
+            { id: 1, name: 'Home', total: 2000, icon: '🏠' },
+            { id: 2, name: 'Food', total: 1000, icon: '🍔' },
+            { id: 3, name: 'Transport', total: 500, icon: '🚗' },
+            { id: 4, name: 'Shopping', total: 500, icon: '🛍️' },
+            { id: 5, name: 'Entertainment', total: 300, icon: '🎬' },
+        ];
+    });
+
+    // Monthly budget limit
+    const [monthlyBudgetLimit, setMonthlyBudgetLimit] = useState(() => {
+        const saved = localStorage.getItem('monthlyBudgetLimit');
+        return saved ? parseFloat(saved) : 5000;
+    });
+
+    // Savings goal
+    const [savingsGoal, setSavingsGoal] = useState(() => {
+        const saved = localStorage.getItem('savingsGoal');
+        return saved ? parseFloat(saved) : 10000;
+    });
+
+    // Save to localStorage whenever data changes
+    useEffect(() => {
+        localStorage.setItem('transactions', JSON.stringify(transactions));
+    }, [transactions]);
+
+    useEffect(() => {
+        localStorage.setItem('budgetCategories', JSON.stringify(budgetCategories));
+    }, [budgetCategories]);
+
+    useEffect(() => {
+        localStorage.setItem('monthlyBudgetLimit', monthlyBudgetLimit.toString());
+    }, [monthlyBudgetLimit]);
+
+    useEffect(() => {
+        localStorage.setItem('savingsGoal', savingsGoal.toString());
+    }, [savingsGoal]);
+
+    // REAL-TIME CALCULATIONS
+    const calculations = useMemo(() => {
+        // Calculate total income and expenses
+        const totalIncome = transactions
+            .filter(t => t.amount > 0)
+            .reduce((sum, t) => sum + t.amount, 0);
+
+        const totalExpenses = Math.abs(transactions
+            .filter(t => t.amount < 0)
+            .reduce((sum, t) => sum + t.amount, 0));
+
+        // Current balance = income - expenses
+        const currentBalance = totalIncome - totalExpenses;
+
+        // Calculate spending by category
+        const categorySpending: Record<string, number> = {};
+        transactions
+            .filter(t => t.amount < 0)
+            .forEach(t => {
+                const category = t.category;
+                categorySpending[category] = (categorySpending[category] || 0) + Math.abs(t.amount);
+            });
+
+        // Calculate budget progress for each category
+        const budgetProgress = budgetCategories.map(cat => {
+            // Find matching category spending (case-insensitive partial match)
+            const spent = Object.entries(categorySpending).reduce((sum, [key, value]) => {
+                if (key.toLowerCase().includes(cat.name.toLowerCase()) ||
+                    cat.name.toLowerCase().includes(key.toLowerCase())) {
+                    return sum + value;
+                }
+                return sum;
+            }, 0);
+
+            return {
+                ...cat,
+                spent: spent,
+                percentage: cat.total > 0 ? Math.min((spent / cat.total) * 100, 100) : 0
+            };
+        });
+
+        // Total budget spent across all categories
+        const totalBudgetSpent = totalExpenses;
+        const budgetRemaining = monthlyBudgetLimit - totalBudgetSpent;
+        const budgetPercentage = monthlyBudgetLimit > 0
+            ? Math.min((totalBudgetSpent / monthlyBudgetLimit) * 100, 100)
+            : 0;
+
+        // Savings calculation
+        const currentSavings = currentBalance;
+        const savingsPercentage = savingsGoal > 0
+            ? Math.min((currentSavings / savingsGoal) * 100, 100)
+            : 0;
+
+        return {
+            totalIncome,
+            totalExpenses,
+            currentBalance,
+            categorySpending,
+            budgetProgress,
+            totalBudgetSpent,
+            budgetRemaining,
+            budgetPercentage,
+            currentSavings,
+            savingsPercentage
+        };
+    }, [transactions, budgetCategories, monthlyBudgetLimit, savingsGoal]);
+
+    const handleAddTransaction = (transactionData: any) => {
+        const newTransaction: Transaction = {
+            id: Math.max(...transactions.map(t => t.id), 0) + 1,
+            ...transactionData,
+            icon: transactionData.amount > 0 ? '💰' : '💸'
+        };
+        setTransactions([newTransaction, ...transactions]);
+        setShowAddTransaction(false);
+    };
+
+    const handleEditTransaction = (transactionData: any) => {
+        if (editingTransaction) {
+            setTransactions(transactions.map(t =>
+                t.id === editingTransaction.id ? { ...t, ...transactionData } : t
+            ));
+            setEditingTransaction(null);
+        }
+    };
+
+    const handleDeleteTransaction = () => {
+        if (transactionToDelete) {
+            setTransactions(transactions.filter(t => t.id !== transactionToDelete));
+            setTransactionToDelete(null);
+        }
+    };
+
+    const handleSaveBudget = (budgetData: any) => {
+        setMonthlyBudgetLimit(budgetData.total);
+        setShowBudgetEdit(false);
+    };
+
+    return (
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-32">
+            <div className="max-w-md mx-auto px-4 py-6">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6">
+                    <h1 className="text-2xl font-bold">Finance</h1>
+                    <div className="flex gap-3">
+                        <button
+                            onClick={() => setShowSearch(!showSearch)}
+                            className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center hover:scale-105 transition-all duration-200 shadow-sm"
+                        >
+                            <Search className="w-5 h-5" />
+                        </button>
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowNotifications(!showNotifications)}
+                                className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center hover:scale-105 transition-all duration-200 shadow-sm"
+                            >
+                                <Bell className="w-5 h-5" />
+                            </button>
+                            {showNotifications && (
+                                <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 z-10 animate-slide-down">
+                                    <h3 className="font-semibold mb-2">Notifications</h3>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">No new notifications</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Search Bar */}
+                {showSearch && (
+                    <div className="mb-6 animate-slide-down">
+                        <div className="relative">
+                            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Search transactions..."
+                                className="input-field pl-12"
+                                autoFocus
+                            />
+                            <button
+                                onClick={() => setShowSearch(false)}
+                                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Balance Card - Real-time calculated */}
+                <div className="bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 rounded-3xl p-6 mb-6 text-white shadow-lg">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                            <Wallet className="w-5 h-5" />
+                            <span className="text-sm opacity-90">Current Balance</span>
+                        </div>
+                        <TrendingUp className="w-5 h-5 opacity-90" />
+                    </div>
+                    <h2 className="text-4xl font-bold mb-6">{formatAmount(calculations.currentBalance)}</h2>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3">
+                            <p className="text-xs opacity-75 mb-1">Income</p>
+                            <p className="text-lg font-semibold text-green-300">{formatAmount(calculations.totalIncome)}</p>
+                        </div>
+                        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3">
+                            <p className="text-xs opacity-75 mb-1">Expenses</p>
+                            <p className="text-lg font-semibold text-red-300">{formatAmount(calculations.totalExpenses)}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Tabs */}
+                <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+                    {tabs.map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition ${activeTab === tab.id
+                                    ? 'bg-black dark:bg-white text-white dark:text-black'
+                                    : 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                                }`}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
+
+                {/* Overview Tab */}
+                {activeTab === 'overview' && (
+                    <div className="space-y-6">
+                        {/* Quick Stats */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm">
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Budget Used</p>
+                                <p className="text-2xl font-bold">{calculations.budgetPercentage.toFixed(0)}%</p>
+                                <div className="mt-2 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                    <div
+                                        className={`h-full transition-all ${calculations.budgetPercentage > 90 ? 'bg-red-500' :
+                                                calculations.budgetPercentage > 70 ? 'bg-yellow-500' :
+                                                    'bg-green-500'
+                                            }`}
+                                        style={{ width: `${calculations.budgetPercentage}%` }}
+                                    />
+                                </div>
+                            </div>
+                            <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm">
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Savings Goal</p>
+                                <p className="text-2xl font-bold">{calculations.savingsPercentage.toFixed(0)}%</p>
+                                <div className="mt-2 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-blue-500 transition-all"
+                                        style={{ width: `${calculations.savingsPercentage}%` }}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Recent Transactions */}
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="font-bold">Recent Transactions</h3>
+                                <button
+                                    onClick={() => setActiveTab('transactions')}
+                                    className="text-sm text-blue-500 hover:underline"
+                                >
+                                    View All
+                                </button>
+                            </div>
+                            <div className="space-y-3">
+                                {transactions.slice(0, 5).map(transaction => (
+                                    <div key={transaction.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-xl">
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-2xl">{transaction.icon}</span>
+                                            <div>
+                                                <p className="font-medium">{transaction.name}</p>
+                                                <p className="text-xs text-gray-500 dark:text-gray-400">{transaction.category}</p>
+                                            </div>
+                                        </div>
+                                        <span className={`font-semibold ${transaction.amount > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                            {transaction.amount > 0 ? '+' : ''}{formatAmount(transaction.amount)}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Transactions Tab */}
+                {activeTab === 'transactions' && (
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <h3 className="font-bold">All Transactions ({transactions.length})</h3>
+                            <button
+                                onClick={() => setShowAddTransaction(true)}
+                                className="flex items-center gap-2 bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-xl font-medium hover:scale-105 transition"
+                            >
+                                <Plus className="w-4 h-4" />
+                                Add
+                            </button>
+                        </div>
+                        <div className="space-y-3">
+                            {transactions.map(transaction => (
+                                <div key={transaction.id} className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-2xl">{transaction.icon}</span>
+                                            <div>
+                                                <p className="font-medium">{transaction.name}</p>
+                                                <p className="text-xs text-gray-500 dark:text-gray-400">{transaction.category}</p>
+                                            </div>
+                                        </div>
+                                        <span className={`font-bold ${transaction.amount > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                            {transaction.amount > 0 ? '+' : ''}{formatAmount(transaction.amount)}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                                        <span>{transaction.date}</span>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => setEditingTransaction(transaction)}
+                                                className="text-blue-500 hover:underline"
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                onClick={() => setTransactionToDelete(transaction.id)}
+                                                className="text-red-500 hover:underline"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Budget Tab - Real-time calculated */}
+                {activeTab === 'budget' && (
+                    <div className="space-y-4">
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="font-bold">Monthly Budget</h3>
+                                <button
+                                    onClick={() => setShowBudgetEdit(true)}
+                                    className="text-sm text-blue-500 hover:underline"
+                                >
+                                    Edit Limit
+                                </button>
+                            </div>
+                            <div className="mb-4">
+                                <div className="flex justify-between text-sm mb-2">
+                                    <span className="text-gray-600 dark:text-gray-400">
+                                        {formatAmount(calculations.totalBudgetSpent)} of {formatAmount(monthlyBudgetLimit)}
+                                    </span>
+                                    <span className="font-semibold">{calculations.budgetPercentage.toFixed(0)}%</span>
+                                </div>
+                                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                    <div
+                                        className={`h-full transition-all ${calculations.budgetPercentage > 90 ? 'bg-red-500' :
+                                                calculations.budgetPercentage > 70 ? 'bg-yellow-500' :
+                                                    'bg-green-500'
+                                            }`}
+                                        style={{ width: `${calculations.budgetPercentage}%` }}
+                                    />
+                                </div>
+                            </div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                                Remaining: <span className="font-semibold">{formatAmount(calculations.budgetRemaining)}</span>
+                            </p>
+                        </div>
+
+                        <h3 className="font-bold">Categories</h3>
+                        <div className="space-y-3">
+                            {calculations.budgetProgress.map(category => (
+                                <div key={category.id} className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xl">{category.icon}</span>
+                                            <span className="font-medium">{category.name}</span>
+                                        </div>
+                                        <span className="text-sm font-semibold">
+                                            {formatAmount(category.spent)} / {formatAmount(category.total)}
+                                        </span>
+                                    </div>
+                                    <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                        <div
+                                            className={`h-full transition-all ${category.percentage > 90 ? 'bg-red-500' :
+                                                    category.percentage > 70 ? 'bg-yellow-500' :
+                                                        'bg-blue-500'
+                                                }`}
+                                            style={{ width: `${category.percentage}%` }}
+                                        />
+                                    </div>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                        {category.percentage.toFixed(0)}% used
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Savings Tab - Real-time calculated */}
+                {activeTab === 'savings' && (
+                    <div className="space-y-4">
+                        <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl p-6 text-white shadow-lg">
+                            <h3 className="text-lg font-semibold mb-2">Savings Goal</h3>
+                            <p className="text-4xl font-bold mb-4">{formatAmount(calculations.currentSavings)}</p>
+                            <div className="bg-white/20 backdrop-blur-sm rounded-full h-3 overflow-hidden mb-2">
+                                <div
+                                    className="h-full bg-white transition-all"
+                                    style={{ width: `${calculations.savingsPercentage}%` }}
+                                />
+                            </div>
+                            <p className="text-sm opacity-90">
+                                {calculations.savingsPercentage.toFixed(0)}% of {formatAmount(savingsGoal)} goal
+                            </p>
+                        </div>
+
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm">
+                            <h3 className="font-bold mb-4">Savings Breakdown</h3>
+                            <div className="space-y-3">
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600 dark:text-gray-400">Total Income</span>
+                                    <span className="font-semibold text-green-500">{formatAmount(calculations.totalIncome)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600 dark:text-gray-400">Total Expenses</span>
+                                    <span className="font-semibold text-red-500">-{formatAmount(calculations.totalExpenses)}</span>
+                                </div>
+                                <div className="border-t border-gray-200 dark:border-gray-700 pt-3 flex justify-between">
+                                    <span className="font-bold">Current Savings</span>
+                                    <span className="font-bold text-blue-500">{formatAmount(calculations.currentSavings)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600 dark:text-gray-400">Remaining to Goal</span>
+                                    <span className="font-semibold">{formatAmount(savingsGoal - calculations.currentSavings)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Add Transaction Modal */}
+            {showAddTransaction && (
+                <ModalWrapper onClose={() => setShowAddTransaction(false)} title="Add Transaction">
+                    <TransactionForm
+                        onSubmit={handleAddTransaction}
+                        onCancel={() => setShowAddTransaction(false)}
+                    />
+                </ModalWrapper>
+            )}
+
+            {/* Edit Transaction Modal */}
+            {editingTransaction && (
+                <ModalWrapper onClose={() => setEditingTransaction(null)} title="Edit Transaction">
+                    <TransactionForm
+                        transaction={editingTransaction}
+                        onSubmit={handleEditTransaction}
+                        onCancel={() => setEditingTransaction(null)}
+                    />
+                </ModalWrapper>
+            )}
+
+            {/* Delete Confirmation */}
+            {transactionToDelete && (
+                <ConfirmDialog
+                    isOpen={!!transactionToDelete}
+                    onClose={() => setTransactionToDelete(null)}
+                    title="Delete Transaction"
+                    message="Are you sure you want to delete this transaction?"
+                    confirmText="Delete"
+                    onConfirm={handleDeleteTransaction}
+                    variant="danger"
+                />
+            )}
+
+            {/* Budget Edit Modal */}
+            {showBudgetEdit && (
+                <ModalWrapper onClose={() => setShowBudgetEdit(false)} title="Edit Monthly Budget">
+                    <BudgetForm
+                        budget={{ total: monthlyBudgetLimit, spent: calculations.totalBudgetSpent }}
+                        onSubmit={handleSaveBudget}
+                        onCancel={() => setShowBudgetEdit(false)}
+                    />
+                </ModalWrapper>
+            )}
+        </div>
+    );
+};
+
+export default Finance;
