@@ -108,7 +108,7 @@ const Profile = () => {
                 {/* Header */}
                 <div className="flex items-center gap-4 mb-8">
                     <button
-                        onClick={() => navigate('/dashboard')}
+                        onClick={() => navigate('/')}
                         className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-sm"
                     >
                         <ArrowLeft className="w-5 h-5" />
