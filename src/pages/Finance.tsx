@@ -251,17 +251,7 @@ const Finance = () => {
                         </div>
                         <TrendingUp className="w-5 h-5 opacity-90" />
                     </div>
-                    <h2 className="text-4xl font-bold mb-6">{formatAmount(calculations.currentBalance)}</h2>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3">
-                            <p className="text-xs opacity-75 mb-1">Income</p>
-                            <p className="text-lg font-semibold text-green-300">{formatAmount(calculations.totalIncome)}</p>
-                        </div>
-                        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3">
-                            <p className="text-xs opacity-75 mb-1">Expenses</p>
-                            <p className="text-lg font-semibold text-red-300">{formatAmount(calculations.totalExpenses)}</p>
-                        </div>
-                    </div>
+                    <h2 className="text-4xl font-bold">{formatAmount(calculations.currentBalance)}</h2>
                 </div>
 
                 {/* Tabs */}
@@ -283,61 +273,121 @@ const Finance = () => {
                 {/* Overview Tab */}
                 {activeTab === 'overview' && (
                     <div className="space-y-6">
-                        {/* Quick Stats */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm">
-                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Budget Used</p>
-                                <p className="text-2xl font-bold">{calculations.budgetPercentage.toFixed(0)}%</p>
-                                <div className="mt-2 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                    <div
-                                        className={`h-full transition-all ${calculations.budgetPercentage > 90 ? 'bg-red-500' :
-                                                calculations.budgetPercentage > 70 ? 'bg-yellow-500' :
-                                                    'bg-green-500'
-                                            }`}
-                                        style={{ width: `${calculations.budgetPercentage}%` }}
-                                    />
+                        {/* VISA Card */}
+                        <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-3xl p-6 text-white shadow-2xl overflow-hidden">
+                            {/* Decorative elements */}
+                            <div className="absolute top-10 right-10 w-32 h-32 bg-white/5 rounded-full blur-3xl"></div>
+                            <div className="absolute bottom-10 left-10 w-24 h-24 bg-white/5 rounded-full blur-2xl"></div>
+                            
+                            <div className="relative z-10">
+                                <div className="flex items-center justify-between mb-8">
+                                    <div className="text-2xl font-bold italic">VISA</div>
+                                    <div className="flex items-center gap-2">
+                                        <button className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/20 transition">
+                                            <Plus className="w-5 h-5" />
+                                        </button>
+                                        <div className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-medium">
+                                            Set Bank
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm">
-                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Savings Goal</p>
-                                <p className="text-2xl font-bold">{calculations.savingsPercentage.toFixed(0)}%</p>
-                                <div className="mt-2 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                    <div
-                                        className="h-full bg-blue-500 transition-all"
-                                        style={{ width: `${calculations.savingsPercentage}%` }}
-                                    />
+                                
+                                <div className="mb-6">
+                                    <p className="text-sm opacity-75 mb-2">Balance</p>
+                                    <h2 className="text-4xl font-bold">{formatAmount(calculations.currentBalance)}</h2>
+                                </div>
+                                
+                                <div className="flex items-end justify-between">
+                                    <div>
+                                        <p className="text-sm opacity-75 mb-1">**** **** **** 5248</p>
+                                        <p className="font-semibold">Jaya Prakash</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-xs opacity-75 mb-1">Exp 07/28</p>
+                                        <div className="w-12 h-16 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                                            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                                                <path d="M2 17l10 5 10-5"/>
+                                                <path d="M2 12l10 5 10-5"/>
+                                            </svg>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Recent Transactions */}
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm">
+                        {/* Total Balance Section */}
+                        <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm">
                             <div className="flex items-center justify-between mb-4">
-                                <h3 className="font-bold">Recent Transactions</h3>
-                                <button
-                                    onClick={() => setActiveTab('transactions')}
-                                    className="text-sm text-blue-500 hover:underline"
-                                >
-                                    View All
+                                <div>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Balance</p>
+                                    <h3 className="text-4xl font-bold">{formatAmount(calculations.currentBalance)}</h3>
+                                </div>
+                                <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl text-sm font-medium">
+                                    <span>Month</span>
+                                    <ChevronRight className="w-4 h-4 rotate-90" />
                                 </button>
                             </div>
-                            <div className="space-y-3">
-                                {transactions.slice(0, 5).map(transaction => (
-                                    <div key={transaction.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-xl">
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-2xl">{transaction.icon}</span>
-                                            <div>
-                                                <p className="font-medium">{transaction.name}</p>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">{transaction.category}</p>
-                                            </div>
-                                        </div>
-                                        <span className={`font-semibold ${transaction.amount > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                            {transaction.amount > 0 ? '+' : ''}{formatAmount(transaction.amount)}
-                                        </span>
+
+                            {/* Income/Expense Pill */}
+                            <div className="bg-black dark:bg-white rounded-full p-4 flex items-center justify-around">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 bg-white dark:bg-black rounded-full flex items-center justify-center">
+                                        <svg className="w-6 h-6 text-black dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                                        </svg>
                                     </div>
-                                ))}
+                                    <div className="text-white dark:text-black">
+                                        <p className="text-sm opacity-75">Income</p>
+                                        <p className="text-xl font-bold">{formatAmount(calculations.totalIncome)}</p>
+                                    </div>
+                                </div>
+                                <div className="w-px h-12 bg-white/20 dark:bg-black/20"></div>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 bg-white dark:bg-black rounded-full flex items-center justify-center">
+                                        <svg className="w-6 h-6 text-black dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                                        </svg>
+                                    </div>
+                                    <div className="text-white dark:text-black">
+                                        <p className="text-sm opacity-75">Expense</p>
+                                        <p className="text-xl font-bold">{formatAmount(calculations.totalExpenses)}</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+
+                        {/* Savings */}
+                        <button className="w-full bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                                    <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                </div>
+                                <span className="font-semibold text-lg">Savings</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <span className="font-bold text-lg">{formatAmount(calculations.currentSavings)}</span>
+                                <ChevronRight className="w-5 h-5 text-gray-400" />
+                            </div>
+                        </button>
+
+                        {/* Investments */}
+                        <button className="w-full bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                                    <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <span className="font-semibold text-lg">Investments</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <span className="px-3 py-1 bg-green-500 text-white text-sm font-medium rounded-full">Add</span>
+                                <ChevronRight className="w-5 h-5 text-gray-400" />
+                            </div>
+                        </button>
                     </div>
                 )}
 
