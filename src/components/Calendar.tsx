@@ -72,37 +72,37 @@ const Calendar: React.FC = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-3xl p-5 md:p-6 shadow-sm mb-6">
+    <div className="bg-white dark:bg-gray-800 rounded-3xl p-4 shadow-sm mb-6">
       {/* Header with Month/Year and Navigation */}
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg md:text-xl font-bold">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-base md:text-lg font-bold">
           {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
         </h3>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           <button
             onClick={handlePreviousMonth}
-            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition"
+            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition"
             aria-label="Previous month"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-4 h-4" />
           </button>
           <button
             onClick={handleNextMonth}
-            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition"
+            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition"
             aria-label="Next month"
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>
 
       {/* Calendar Grid */}
-      <div className="grid grid-cols-7 gap-2 md:gap-3">
+      <div className="grid grid-cols-7 gap-1.5 md:gap-2">
         {/* Day headers */}
         {daysOfWeek.map((day) => (
           <div
             key={day}
-            className="text-center text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400 pb-2"
+            className="text-center text-xs font-medium text-gray-500 dark:text-gray-400 pb-1"
           >
             {day}
           </div>
@@ -114,7 +114,7 @@ const Calendar: React.FC = () => {
             key={index}
             onClick={() => day && handleDateClick(day)}
             className={`
-              aspect-square flex items-center justify-center text-sm md:text-base font-medium rounded-full transition
+              aspect-square flex items-center justify-center text-xs md:text-sm font-medium rounded-full transition
               ${day ? 'cursor-pointer' : 'cursor-default'}
               ${day && isSelected(day)
                 ? 'bg-black dark:bg-white text-white dark:text-black scale-105'
@@ -130,22 +130,6 @@ const Calendar: React.FC = () => {
           </div>
         ))}
       </div>
-
-      {/* Selected date display */}
-      {selectedDate && (
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
-            Selected: <span className="font-semibold text-black dark:text-white">
-              {selectedDate.toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
-            </span>
-          </p>
-        </div>
-      )}
     </div>
   );
 };
