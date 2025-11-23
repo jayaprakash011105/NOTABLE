@@ -5,7 +5,6 @@ import BalanceCard from '../components/BalanceCard';
 import Calendar from '../components/Calendar';
 import ReminderCard from '../components/ReminderCard';
 import ExpenseChart from '../components/ExpenseChart';
-import { useTranslation } from 'react-i18next';
 
 interface Task {
     id: number;
@@ -16,7 +15,7 @@ interface Task {
 }
 
 const Dashboard = () => {
-    const { t } = useTranslation();
+
 
     // Load tasks from localStorage on mount
     const [quickTasks, setQuickTasks] = useState<Task[]>(() => {
@@ -98,7 +97,7 @@ const Dashboard = () => {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-black pb-24">
             <div className="max-w-md mx-auto px-4 py-6">
-                <Header userName="John" />
+                <Header />
                 <BalanceCard />
 
                 {/* Quick Tasks Section - Enhanced with Edit */}
