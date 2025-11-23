@@ -242,18 +242,6 @@ const Finance = () => {
                     </div>
                 )}
 
-                {/* Balance Card - Real-time calculated */}
-                <div className="bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 rounded-3xl p-6 mb-6 text-white shadow-lg">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2">
-                            <Wallet className="w-5 h-5" />
-                            <span className="text-sm opacity-90">Current Balance</span>
-                        </div>
-                        <TrendingUp className="w-5 h-5 opacity-90" />
-                    </div>
-                    <h2 className="text-4xl font-bold">{formatAmount(calculations.currentBalance)}</h2>
-                </div>
-
                 {/* Tabs */}
                 <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
                     {tabs.map(tab => (
@@ -261,8 +249,8 @@ const Finance = () => {
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition ${activeTab === tab.id
-                                    ? 'bg-black dark:bg-white text-white dark:text-black'
-                                    : 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                                ? 'bg-black dark:bg-white text-white dark:text-black'
+                                : 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
                                 }`}
                         >
                             {tab.label}
@@ -278,7 +266,7 @@ const Finance = () => {
                             {/* Decorative elements */}
                             <div className="absolute top-10 right-10 w-32 h-32 bg-white/5 rounded-full blur-3xl"></div>
                             <div className="absolute bottom-10 left-10 w-24 h-24 bg-white/5 rounded-full blur-2xl"></div>
-                            
+
                             <div className="relative z-10">
                                 <div className="flex items-center justify-between mb-8">
                                     <div className="text-2xl font-bold italic">VISA</div>
@@ -291,12 +279,12 @@ const Finance = () => {
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div className="mb-6">
                                     <p className="text-sm opacity-75 mb-2">Balance</p>
                                     <h2 className="text-4xl font-bold">{formatAmount(calculations.currentBalance)}</h2>
                                 </div>
-                                
+
                                 <div className="flex items-end justify-between">
                                     <div>
                                         <p className="text-sm opacity-75 mb-1">**** **** **** 5248</p>
@@ -306,9 +294,9 @@ const Finance = () => {
                                         <p className="text-xs opacity-75 mb-1">Exp 07/28</p>
                                         <div className="w-12 h-16 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
                                             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                                                <path d="M2 17l10 5 10-5"/>
-                                                <path d="M2 12l10 5 10-5"/>
+                                                <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                                                <path d="M2 17l10 5 10-5" />
+                                                <path d="M2 12l10 5 10-5" />
                                             </svg>
                                         </div>
                                     </div>
@@ -465,8 +453,8 @@ const Finance = () => {
                                 <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                                     <div
                                         className={`h-full transition-all ${calculations.budgetPercentage > 90 ? 'bg-red-500' :
-                                                calculations.budgetPercentage > 70 ? 'bg-yellow-500' :
-                                                    'bg-green-500'
+                                            calculations.budgetPercentage > 70 ? 'bg-yellow-500' :
+                                                'bg-green-500'
                                             }`}
                                         style={{ width: `${calculations.budgetPercentage}%` }}
                                     />
@@ -493,8 +481,8 @@ const Finance = () => {
                                     <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                                         <div
                                             className={`h-full transition-all ${category.percentage > 90 ? 'bg-red-500' :
-                                                    category.percentage > 70 ? 'bg-yellow-500' :
-                                                        'bg-blue-500'
+                                                category.percentage > 70 ? 'bg-yellow-500' :
+                                                    'bg-blue-500'
                                                 }`}
                                             style={{ width: `${category.percentage}%` }}
                                         />
