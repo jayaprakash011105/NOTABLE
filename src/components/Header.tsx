@@ -9,39 +9,39 @@ const Header = () => {
     const [hasNotifications] = useState(true);
 
     return (
-        <div className="mb-6">
+        <div className="mb-4">
             <div className="flex items-center justify-between">
-                {/* Welcome Text - simple, no gradient */}
+                {/* Welcome Text - compact and clean */}
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-bold text-black dark:text-white">
-                        <span className="text-gray-600 dark:text-gray-400 font-normal">Welcome, </span>
+                    <h1 className="text-lg md:text-xl font-bold text-black dark:text-white">
+                        <span className="text-gray-500 dark:text-gray-400 font-normal text-base md:text-lg">Welcome, </span>
                         {userName}!
                     </h1>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                         {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
                     </p>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex items-center gap-3">
+                {/* Action Buttons - smaller and cleaner */}
+                <div className="flex items-center gap-2">
                     {/* Notification Bell */}
                     <button
-                        className="relative w-11 h-11 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200"
+                        className="relative w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200"
                         aria-label="Notifications"
                     >
-                        <Bell className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                        <Bell className="w-4 h-4 text-gray-700 dark:text-gray-300" />
                         {hasNotifications && (
-                            <span className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-gray-900 animate-pulse" />
+                            <span className="absolute top-0.5 right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-900 animate-pulse" />
                         )}
                     </button>
 
-                    {/* User Avatar - simple black background */}
+                    {/* User Avatar */}
                     <button
                         onClick={() => navigate('/profile')}
-                        className="w-11 h-11 rounded-full bg-black dark:bg-white flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200"
+                        className="w-9 h-9 rounded-full bg-black dark:bg-white flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200"
                         aria-label="Profile"
                     >
-                        <User className="w-5 h-5 text-white dark:text-black" strokeWidth={2.5} />
+                        <User className="w-4 h-4 text-white dark:text-black" strokeWidth={2.5} />
                     </button>
                 </div>
             </div>
