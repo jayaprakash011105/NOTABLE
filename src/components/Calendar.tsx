@@ -1,24 +1,104 @@
-import React from 'react';
-import { MoreHorizontal } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import React, { useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const Calendar: React.FC = () => {
-  const { t } = useTranslation();
-  const daysOfWeek = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
-  const currentDate = 6;
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
 
-  const dates = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+  // Get the first day of the month
+  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+  // Get the last day of the month
+  const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+
+  // Get the day of week for the first day (0 = Sunday, 1 = Monday, etc.)
+  // Adjust so Monday is 0
+  const firstDayOfWeek = (firstDayOfMonth.getDay() + 6) % 7;
+
+  const daysOfWeek = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  // Generate array of dates to display
+  const generateCalendarDays = () => {
+    const days = [];
+    const totalDays = lastDayOfMonth.getDate();
+
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < firstDayOfWeek; i++) {
+      days.push(null);
+    }
+
+    // Add all days of the month
+    for (let day = 1; day <= totalDays; day++) {
+      days.push(day);
+    }
+
+    return days;
+  };
+
+  const calendarDays = generateCalendarDays();
+
+  const handlePreviousMonth = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+  };
+
+  const handleDateClick = (day: number) => {
+    const newSelectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+    setSelectedDate(newSelectedDate);
+  };
+
+  const isToday = (day: number) => {
+    const today = new Date();
+    return (
+      day === today.getDate() &&
+      currentDate.getMonth() === today.getMonth() &&
+      currentDate.getFullYear() === today.getFullYear()
+    );
+  };
+
+  const isSelected = (day: number) => {
+    if (!selectedDate) return false;
+    return (
+      day === selectedDate.getDate() &&
+      currentDate.getMonth() === selectedDate.getMonth() &&
+      currentDate.getFullYear() === selectedDate.getFullYear()
+    );
+  };
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-3xl p-5 md:p-6 shadow-sm mb-6">
+      {/* Header with Month/Year and Navigation */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg md:text-xl font-bold">{t('december')}</h3>
-        <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition">
-          <MoreHorizontal className="w-5 h-5" />
-        </button>
+        <h3 className="text-lg md:text-xl font-bold">
+          {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+        </h3>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={handlePreviousMonth}
+            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition"
+            aria-label="Previous month"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            onClick={handleNextMonth}
+            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition"
+            aria-label="Next month"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
+      {/* Calendar Grid */}
       <div className="grid grid-cols-7 gap-2 md:gap-3">
+        {/* Day headers */}
         {daysOfWeek.map((day) => (
           <div
             key={day}
@@ -27,22 +107,45 @@ const Calendar: React.FC = () => {
             {day}
           </div>
         ))}
-        {dates.map((date) => (
+
+        {/* Calendar days */}
+        {calendarDays.map((day, index) => (
           <div
-            key={date}
+            key={index}
+            onClick={() => day && handleDateClick(day)}
             className={`
-              aspect-square flex items-center justify-center text-sm md:text-base font-medium rounded-full transition cursor-pointer
-              ${
-                date === currentDate
-                  ? 'bg-black dark:bg-white text-white dark:text-black'
-                  : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+              aspect-square flex items-center justify-center text-sm md:text-base font-medium rounded-full transition
+              ${day ? 'cursor-pointer' : 'cursor-default'}
+              ${day && isSelected(day)
+                ? 'bg-black dark:bg-white text-white dark:text-black scale-105'
+                : day && isToday(day)
+                  ? 'bg-gray-200 dark:bg-gray-700 ring-2 ring-black dark:ring-white'
+                  : day
+                    ? 'hover:bg-gray-100 dark:hover:bg-gray-700 hover:scale-105'
+                    : ''
               }
             `}
           >
-            {date}
+            {day || ''}
           </div>
         ))}
       </div>
+
+      {/* Selected date display */}
+      {selectedDate && (
+        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+            Selected: <span className="font-semibold text-black dark:text-white">
+              {selectedDate.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+            </span>
+          </p>
+        </div>
+      )}
     </div>
   );
 };
