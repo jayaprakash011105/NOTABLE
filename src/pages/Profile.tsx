@@ -1,10 +1,19 @@
-import { useState } from 'react';
-import { ArrowLeft, User, Palette, CreditCard, Crown, Settings, FileText, Link2, Upload, ChevronRight, Moon, Sun } from 'lucide-react';
+import { ArrowLeft, User, Moon, Sun, CreditCard, Crown, Settings, FileText, Link2, Upload, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { useLanguage } from '../contexts/LanguageContext';
+
+interface MenuItem {
+    icon: any;
+    label: string;
+    value?: string;
+    action?: () => void;
+    iconColor?: string;
+    bgColor?: string;
+    submenu?: any[];
+}
 
 const Profile = () => {
     const navigate = useNavigate();
@@ -107,6 +116,7 @@ const Profile = () => {
                                         <ChevronRight className="w-5 h-5 text-gray-400" />
                                     </button>
                                 ))}
+
                             </div>
                         </div>
                     ))}
