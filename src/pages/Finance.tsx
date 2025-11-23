@@ -243,7 +243,7 @@ const Finance = () => {
                 )}
 
                 {/* Tabs */}
-                <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+                <div className="flex gap-2 mb-6">
                     {tabs.map(tab => (
                         <button
                             key={tab.id}
@@ -260,45 +260,36 @@ const Finance = () => {
 
                 {/* Overview Tab */}
                 {activeTab === 'overview' && (
-                    <div className="space-y-6">
+                    <div className="space-y-5">
                         {/* VISA Card */}
-                        <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-3xl p-6 text-white shadow-2xl overflow-hidden">
+                        <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-2xl p-4 text-white shadow-xl overflow-hidden">
                             {/* Decorative elements */}
-                            <div className="absolute top-10 right-10 w-32 h-32 bg-white/5 rounded-full blur-3xl"></div>
-                            <div className="absolute bottom-10 left-10 w-24 h-24 bg-white/5 rounded-full blur-2xl"></div>
+                            <div className="absolute top-6 right-6 w-20 h-20 bg-white/5 rounded-full blur-2xl"></div>
 
                             <div className="relative z-10">
-                                <div className="flex items-center justify-between mb-8">
-                                    <div className="text-2xl font-bold italic">VISA</div>
-                                    <div className="flex items-center gap-2">
-                                        <button className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/20 transition">
-                                            <Plus className="w-5 h-5" />
-                                        </button>
-                                        <div className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-medium">
-                                            Set Bank
-                                        </div>
-                                    </div>
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="text-lg font-bold italic">VISA</div>
+                                    <button
+                                        onClick={() => setShowAddTransaction(true)}
+                                        className="px-3 py-1.5 bg-white/10 backdrop-blur-sm rounded-full text-xs font-medium hover:bg-white/20 transition flex items-center gap-1"
+                                    >
+                                        <Plus className="w-3 h-3" />
+                                        Set Bank
+                                    </button>
                                 </div>
 
-                                <div className="mb-6">
-                                    <p className="text-sm opacity-75 mb-2">Balance</p>
-                                    <h2 className="text-4xl font-bold">{formatAmount(calculations.currentBalance)}</h2>
+                                <div className="mb-3">
+                                    <p className="text-xs opacity-75 mb-1">Balance</p>
+                                    <h2 className="text-2xl font-bold">{formatAmount(calculations.currentBalance)}</h2>
                                 </div>
 
                                 <div className="flex items-end justify-between">
                                     <div>
-                                        <p className="text-sm opacity-75 mb-1">**** **** **** 5248</p>
-                                        <p className="font-semibold">Jaya Prakash</p>
+                                        <p className="text-xs opacity-75">**** **** **** 5248</p>
+                                        <p className="text-sm font-semibold mt-1">Jaya Prakash</p>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-xs opacity-75 mb-1">Exp 07/28</p>
-                                        <div className="w-12 h-16 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
-                                            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                                                <path d="M2 17l10 5 10-5" />
-                                                <path d="M2 12l10 5 10-5" />
-                                            </svg>
-                                        </div>
+                                        <p className="text-xs opacity-75">Exp 07/28</p>
                                     </div>
                                 </div>
                             </div>
