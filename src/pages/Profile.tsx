@@ -26,20 +26,20 @@ const Profile = () => {
         {
             title: 'Account',
             items: [
-                { icon: User, label: 'Manage Account', action: () => console.log('Manage Account') },
+                { icon: User, label: 'Manage Account', action: () => console.log('Manage Account') } as MenuItem,
                 {
                     icon: theme === 'dark' ? Moon : Sun,
                     label: 'Theme',
                     value: theme === 'dark' ? 'Dark' : 'Light',
                     action: toggleTheme
-                },
+                } as MenuItem,
             ]
         },
         {
             title: 'Plans',
             items: [
-                { icon: CreditCard, label: 'Free AI Credits', iconColor: 'text-blue-500', bgColor: 'bg-blue-100 dark:bg-blue-900' },
-                { icon: Crown, label: 'Upgrade Plan', iconColor: 'text-yellow-500', bgColor: 'bg-yellow-100 dark:bg-yellow-900' },
+                { icon: CreditCard, label: 'Free AI Credits', iconColor: 'text-blue-500', bgColor: 'bg-blue-100 dark:bg-blue-900' } as MenuItem,
+                { icon: Crown, label: 'Upgrade Plan', iconColor: 'text-yellow-500', bgColor: 'bg-yellow-100 dark:bg-yellow-900' } as MenuItem,
             ]
         },
         {
@@ -52,21 +52,21 @@ const Profile = () => {
                         { label: 'Currency', value: currency, options: ['USD', 'EUR', 'GBP', 'INR'], onChange: setCurrency },
                         { label: 'Language', value: language, options: ['en', 'es'], onChange: setLanguage }
                     ]
-                },
-                { icon: FileText, label: 'Todo Preferences' },
+                } as MenuItem,
+                { icon: FileText, label: 'Todo Preferences' } as MenuItem,
             ]
         },
         {
             title: 'External Services',
             items: [
-                { icon: Link2, label: 'Integration' },
-                { icon: Upload, label: 'Imports' },
+                { icon: Link2, label: 'Integration' } as MenuItem,
+                { icon: Upload, label: 'Imports' } as MenuItem,
             ]
         },
         {
             title: 'Advanced',
             items: [
-                { icon: Settings, label: 'Advanced Settings' },
+                { icon: Settings, label: 'Advanced Settings' } as MenuItem,
             ]
         }
     ];
