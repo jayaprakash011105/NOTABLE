@@ -1,12 +1,53 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Bell, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 
+interface Reminder {
+    id: number;
+    title: string;
+    description: string;
+    dateTime: string;
+    notified: boolean;
+}
+
 const Header = () => {
     const navigate = useNavigate();
     const { userName } = useUser();
-    const [hasNotifications] = useState(true);
+    const [hasNotifications, setHasNotifications] = useState(false);
+    const [dueRemindersCount, setDueRemindersCount] = useState(0);
+
+    useEffect(() => {
+        const checkReminders = () => {
+            // Load reminders from localStorage
+            const savedReminders = localStorage.getItem('reminders');
+            if (!savedReminders) {
+                setHasNotifications(false);
+                setDueRemindersCount(0);
+                return;
+            }
+
+            const reminders: Reminder[] = JSON.parse(savedReminders);
+            const now = new Date();
+
+            // Count reminders that are due but not yet notified
+            const dueReminders = reminders.filter(reminder => {
+                const reminderTime = new Date(reminder.dateTime);
+                return reminderTime <= now && !reminder.notified;
+            });
+
+            setDueRemindersCount(dueReminders.length);
+            setHasNotifications(dueReminders.length > 0);
+        };
+
+        // Check immediately
+        checkReminders();
+
+        // Check every 30 seconds for real-time updates
+        const interval = setInterval(checkReminders, 30000);
+
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <div className="mb-4">
@@ -31,7 +72,14 @@ const Header = () => {
                     >
                         <Bell className="w-4 h-4 text-gray-700 dark:text-gray-300" />
                         {hasNotifications && (
-                            <span className="absolute top-0.5 right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-900 animate-pulse" />
+                            <>
+                                <span className="absolute top-0.5 right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-black animate-pulse" />
+                                {dueRemindersCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center border-2 border-white dark:border-black">
+                                        {dueRemindersCount > 9 ? '9+' : dueRemindersCount}
+                                    </span>
+                                )}
+                            </>
                         )}
                     </button>
 
