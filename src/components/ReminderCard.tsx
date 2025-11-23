@@ -138,7 +138,7 @@ const ReminderCard: React.FC = () => {
     };
 
     return (
-        <div className="bg-gradient-to-br from-teal-500/80 to-teal-600/70 dark:from-teal-600/70 dark:to-teal-700/60 rounded-3xl p-4 text-white shadow-md mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-3xl p-4 shadow-sm mb-6">
             <div className="flex items-center justify-between mb-3">
                 <h4 className="text-sm md:text-base font-semibold flex items-center gap-2">
                     <Bell className="w-4 h-4" />
@@ -146,7 +146,7 @@ const ReminderCard: React.FC = () => {
                 </h4>
                 <button
                     onClick={() => setShowAddForm(!showAddForm)}
-                    className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition"
+                    className="w-7 h-7 rounded-full bg-black dark:bg-white text-white dark:text-black hover:scale-110 flex items-center justify-center transition"
                 >
                     {showAddForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                 </button>
@@ -154,37 +154,37 @@ const ReminderCard: React.FC = () => {
 
             {/* Add/Edit Form */}
             {showAddForm && (
-                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 mb-3 space-y-2">
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-3 mb-3 space-y-2">
                     <input
                         type="text"
                         placeholder="Reminder title"
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                        className="w-full px-3 py-2 bg-white/20 rounded-lg text-white placeholder-white/60 text-sm focus:outline-none focus:ring-2 focus:ring-white/50"
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
                     />
                     <input
                         type="text"
                         placeholder="Description (optional)"
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        className="w-full px-3 py-2 bg-white/20 rounded-lg text-white placeholder-white/60 text-sm focus:outline-none focus:ring-2 focus:ring-white/50"
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
                     />
                     <input
                         type="datetime-local"
                         value={formData.dateTime}
                         onChange={(e) => setFormData({ ...formData, dateTime: e.target.value })}
-                        className="w-full px-3 py-2 bg-white/20 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/50"
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
                     />
                     <div className="flex gap-2">
                         <button
                             onClick={editingId ? handleEditReminder : handleAddReminder}
-                            className="flex-1 bg-white text-teal-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-white/90 transition"
+                            className="flex-1 bg-black dark:bg-white text-white dark:text-black px-3 py-2 rounded-lg text-sm font-medium hover:scale-105 transition"
                         >
                             {editingId ? 'Update' : 'Add'}
                         </button>
                         <button
                             onClick={cancelForm}
-                            className="px-3 py-2 bg-white/20 rounded-lg text-sm font-medium hover:bg-white/30 transition"
+                            className="px-3 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition"
                         >
                             Cancel
                         </button>
@@ -195,7 +195,7 @@ const ReminderCard: React.FC = () => {
             {/* Reminders List */}
             <div className="space-y-2">
                 {reminders.length === 0 ? (
-                    <p className="text-sm text-white/70 text-center py-4">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
                         No reminders set. Click + to add one!
                     </p>
                 ) : (
@@ -204,35 +204,35 @@ const ReminderCard: React.FC = () => {
                         .map(reminder => (
                             <div
                                 key={reminder.id}
-                                className={`bg-white/10 backdrop-blur-sm rounded-xl p-3 ${reminder.notified ? 'opacity-50' : ''
+                                className={`bg-gray-50 dark:bg-gray-900 rounded-xl p-3 border border-gray-200 dark:border-gray-700 ${reminder.notified ? 'opacity-50' : ''
                                     }`}
                             >
                                 <div className="flex items-start justify-between mb-1">
                                     <div className="flex-1">
                                         <h5 className="font-medium text-sm">{reminder.title}</h5>
                                         {reminder.description && (
-                                            <p className="text-xs text-white/80 mt-0.5">{reminder.description}</p>
+                                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">{reminder.description}</p>
                                         )}
                                     </div>
                                     <div className="flex gap-1">
                                         <button
                                             onClick={() => startEdit(reminder)}
-                                            className="w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition"
+                                            className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 flex items-center justify-center transition"
                                         >
                                             <Edit2 className="w-3 h-3" />
                                         </button>
                                         <button
                                             onClick={() => handleDeleteReminder(reminder.id)}
-                                            className="w-6 h-6 rounded-full bg-white/20 hover:bg-red-500/50 flex items-center justify-center transition"
+                                            className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-red-500 hover:text-white flex items-center justify-center transition"
                                         >
                                             <Trash2 className="w-3 h-3" />
                                         </button>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-2 text-xs">
+                                <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
                                     <Clock className="w-3 h-3" />
                                     <span>{formatDateTime(reminder.dateTime)}</span>
-                                    <span className="ml-auto bg-white/20 px-2 py-0.5 rounded-full">
+                                    <span className="ml-auto bg-black dark:bg-white text-white dark:text-black px-2 py-0.5 rounded-full font-medium">
                                         {getTimeUntil(reminder.dateTime)}
                                     </span>
                                 </div>
