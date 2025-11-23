@@ -261,12 +261,6 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                <div className="mb-6">
-                    <h3 className="text-base md:text-lg font-bold mb-3 flex items-center gap-2">
-                        Overall Insights
-                        <span className="text-gray-400">•••</span>
-                    </h3>
-                </div>
 
                 <Calendar />
 
