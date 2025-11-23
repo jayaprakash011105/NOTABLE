@@ -118,7 +118,7 @@ const ExpenseChart: React.FC = () => {
     const maxAmount = Math.max(...chartData.map(d => d.amount), 1);
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-3xl p-5 md:p-6 shadow-sm mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-3xl p-5 md:p-6 shadow-sm mb-4">
             <div className="flex items-center justify-between mb-4">
                 <div className="relative">
                     <button

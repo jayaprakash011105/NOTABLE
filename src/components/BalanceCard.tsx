@@ -26,7 +26,7 @@ const BalanceCard = ({ balance, income, expense }: BalanceCardProps) => {
     };
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-3xl p-5 md:p-6 shadow-sm mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-3xl p-5 md:p-6 shadow-sm mb-4">
             <div className="flex items-center justify-between mb-2">
                 <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
                     {t('totalBalance')}

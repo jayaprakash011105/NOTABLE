@@ -72,7 +72,7 @@ const Calendar: React.FC = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-3xl p-2.5 shadow-sm mb-6">
+    <div className="bg-white dark:bg-gray-800 rounded-3xl p-2.5 shadow-sm mb-4">
       {/* Header with Month/Year and Navigation */}
       <div className="flex items-center justify-between mb-1.5">
         <h3 className="text-xs md:text-sm font-bold">
