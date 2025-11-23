@@ -10,6 +10,12 @@ interface Transaction {
     type?: 'income' | 'expense';
 }
 
+// Define months array outside component so it can be used in initialization
+const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+];
+
 const BalanceCard = () => {
     const { formatAmount } = useCurrency();
     const [showMonthDropdown, setShowMonthDropdown] = useState(false);
@@ -20,11 +26,6 @@ const BalanceCard = () => {
     const [balance, setBalance] = useState(0);
     const [income, setIncome] = useState(0);
     const [expense, setExpense] = useState(0);
-
-    const months = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
-    ];
 
     useEffect(() => {
         calculateFinancials();
