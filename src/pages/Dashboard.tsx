@@ -5,6 +5,7 @@ import BalanceCard from '../components/BalanceCard';
 import Calendar from '../components/Calendar';
 import ReminderCard from '../components/ReminderCard';
 import ExpenseChart from '../components/ExpenseChart';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 interface Task {
     id: number;
@@ -35,6 +36,8 @@ const Dashboard = () => {
     const [selectedCategory, setSelectedCategory] = useState('Personal');
     const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
     const [editingText, setEditingText] = useState('');
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [taskToDelete, setTaskToDelete] = useState<number | null>(null);
 
     const categories = [
         { name: 'Personal', color: 'bg-purple-100 dark:bg-gray-700 text-purple-800 dark:text-gray-200' },
@@ -55,7 +58,15 @@ const Dashboard = () => {
     };
 
     const handleDeleteTask = (id: number) => {
-        setQuickTasks(quickTasks.filter(task => task.id !== id));
+        setTaskToDelete(id);
+        setShowDeleteConfirm(true);
+    };
+
+    const confirmDelete = () => {
+        if (taskToDelete !== null) {
+            setQuickTasks(quickTasks.filter(task => task.id !== taskToDelete));
+            setTaskToDelete(null);
+        }
     };
 
     const handleAddTask = () => {
@@ -267,6 +278,18 @@ const Dashboard = () => {
                     <ReminderCard />
                     <ExpenseChart />
                 </div>
+
+                {/* Delete Confirmation Dialog */}
+                <ConfirmDialog
+                    isOpen={showDeleteConfirm}
+                    onClose={() => setShowDeleteConfirm(false)}
+                    onConfirm={confirmDelete}
+                    title="Delete Task?"
+                    message="Are you sure you want to delete this task? This action cannot be undone."
+                    confirmText="Delete"
+                    cancelText="Cancel"
+                    variant="danger"
+                />
             </div>
         </div>
     );
