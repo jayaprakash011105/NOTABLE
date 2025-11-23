@@ -1,9 +1,12 @@
-import { ArrowLeft, User, Moon, Sun, CreditCard, Crown, Settings, FileText, Link2, Upload, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowLeft, User, Settings, FileText, Link2, Upload, ChevronRight, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import ModalWrapper from '../components/ModalWrapper';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 interface MenuItem {
     icon: any;
@@ -12,61 +15,62 @@ interface MenuItem {
     action?: () => void;
     iconColor?: string;
     bgColor?: string;
-    submenu?: any[];
 }
 
 const Profile = () => {
     const navigate = useNavigate();
-    const { userName } = useUser();
+    const { userName, userEmail, setUserName, setUserEmail } = useUser();
     const { theme, toggleTheme } = useTheme();
     const { currency, setCurrency } = useCurrency();
     const { language, setLanguage } = useLanguage();
+
+    // Modal states
+    const [showEditProfile, setShowEditProfile] = useState(false);
+    const [showAppSettings, setShowAppSettings] = useState(false);
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+    // Edit profile form
+    const [editName, setEditName] = useState(userName);
+    const [editEmail, setEditEmail] = useState(userEmail);
+
+    const handleSaveProfile = () => {
+        setUserName(editName);
+        setUserEmail(editEmail);
+        setShowEditProfile(false);
+    };
+
+    const handleLogout = () => {
+        console.log('Logging out...');
+        navigate('/');
+        setShowLogoutConfirm(false);
+    };
 
     const menuSections = [
         {
             title: 'Account',
             items: [
-                { icon: User, label: 'Manage Account', action: () => console.log('Manage Account') } as MenuItem,
-                {
-                    icon: theme === 'dark' ? Moon : Sun,
-                    label: 'Theme',
-                    value: theme === 'dark' ? 'Dark' : 'Light',
-                    action: toggleTheme
-                } as MenuItem,
-            ]
-        },
-        {
-            title: 'Plans',
-            items: [
-                { icon: CreditCard, label: 'Free AI Credits', iconColor: 'text-blue-500', bgColor: 'bg-blue-100 dark:bg-blue-900' } as MenuItem,
-                { icon: Crown, label: 'Upgrade Plan', iconColor: 'text-yellow-500', bgColor: 'bg-yellow-100 dark:bg-yellow-900' } as MenuItem,
+                { icon: User, label: 'Manage Account', action: () => setShowEditProfile(true) } as MenuItem,
             ]
         },
         {
             title: 'Preferences',
             items: [
-                {
-                    icon: Settings,
-                    label: 'App Settings',
-                    submenu: [
-                        { label: 'Currency', value: currency, options: ['USD', 'EUR', 'GBP', 'INR'], onChange: setCurrency },
-                        { label: 'Language', value: language, options: ['en', 'es'], onChange: setLanguage }
-                    ]
-                } as MenuItem,
-                { icon: FileText, label: 'Todo Preferences' } as MenuItem,
+                { icon: Settings, label: 'App Settings', action: () => setShowAppSettings(true) } as MenuItem,
+                { icon: FileText, label: 'Todo Preferences', action: () => console.log('Todo Preferences') } as MenuItem,
             ]
         },
         {
             title: 'External Services',
             items: [
-                { icon: Link2, label: 'Integration' } as MenuItem,
-                { icon: Upload, label: 'Imports' } as MenuItem,
+                { icon: Link2, label: 'Integration', action: () => console.log('Integration') } as MenuItem,
+                { icon: Upload, label: 'Imports', action: () => console.log('Imports') } as MenuItem,
             ]
         },
         {
             title: 'Advanced',
             items: [
-                { icon: Settings, label: 'Advanced Settings' } as MenuItem,
+                { icon: Settings, label: 'Advanced Settings', action: () => console.log('Advanced Settings') } as MenuItem,
+                { icon: LogOut, label: 'Logout', action: () => setShowLogoutConfirm(true), iconColor: 'text-red-500', bgColor: 'bg-red-100 dark:bg-red-900' } as MenuItem,
             ]
         }
     ];
@@ -83,6 +87,33 @@ const Profile = () => {
                         <ArrowLeft className="w-5 h-5" />
                     </button>
                     <h1 className="text-2xl font-bold">Account</h1>
+                </div>
+
+                {/* Theme Toggle Section */}
+                <div className="mb-8">
+                    <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3 px-1">
+                        Appearance
+                    </h2>
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm">
+                        <div className="flex items-center justify-between">
+                            <span className="font-medium text-gray-900 dark:text-gray-100">Theme</span>
+                            <button
+                                onClick={toggleTheme}
+                                className={`relative w-14 h-8 rounded-full transition-colors duration-300 ${theme === 'dark' ? 'bg-blue-500' : 'bg-gray-300'
+                                    }`}
+                            >
+                                <div
+                                    className={`absolute top-1 left-1 w-6 h-6 rounded-full bg-white shadow-md transition-transform duration-300 flex items-center justify-center ${theme === 'dark' ? 'translate-x-6' : 'translate-x-0'
+                                        }`}
+                                >
+                                    {theme === 'dark' ? '🌙' : '☀️'}
+                                </div>
+                            </button>
+                        </div>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                            Current: {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+                        </p>
+                    </div>
                 </div>
 
                 {/* Menu Sections */}
@@ -108,15 +139,9 @@ const Profile = () => {
                                         <span className="flex-1 text-left font-medium text-gray-900 dark:text-gray-100">
                                             {item.label}
                                         </span>
-                                        {item.value && (
-                                            <span className="text-sm text-gray-500 dark:text-gray-400">
-                                                {item.value}
-                                            </span>
-                                        )}
                                         <ChevronRight className="w-5 h-5 text-gray-400" />
                                     </button>
                                 ))}
-
                             </div>
                         </div>
                     ))}
@@ -130,11 +155,109 @@ const Profile = () => {
                         </div>
                         <div>
                             <p className="font-semibold text-gray-900 dark:text-gray-100">{userName}</p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Free Plan</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{userEmail}</p>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* Edit Profile Modal */}
+            {showEditProfile && (
+                <ModalWrapper
+                    isOpen={showEditProfile}
+                    onClose={() => setShowEditProfile(false)}
+                    title="Edit Profile"
+                >
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Name</label>
+                            <input
+                                type="text"
+                                value={editName}
+                                onChange={(e) => setEditName(e.target.value)}
+                                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-black dark:focus:ring-white"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Email</label>
+                            <input
+                                type="email"
+                                value={editEmail}
+                                onChange={(e) => setEditEmail(e.target.value)}
+                                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-black dark:focus:ring-white"
+                            />
+                        </div>
+                        <div className="flex gap-3 pt-4">
+                            <button
+                                onClick={() => setShowEditProfile(false)}
+                                className="flex-1 px-6 py-3 bg-gray-200 dark:bg-gray-700 rounded-2xl font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSaveProfile}
+                                className="flex-1 px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-medium hover:scale-105 transition"
+                            >
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </ModalWrapper>
+            )}
+
+            {/* App Settings Modal */}
+            {showAppSettings && (
+                <ModalWrapper
+                    isOpen={showAppSettings}
+                    onClose={() => setShowAppSettings(false)}
+                    title="App Settings"
+                >
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Currency</label>
+                            <select
+                                value={currency}
+                                onChange={(e) => setCurrency(e.target.value as any)}
+                                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-black dark:focus:ring-white"
+                            >
+                                <option value="USD">USD - US Dollar</option>
+                                <option value="EUR">EUR - Euro</option>
+                                <option value="GBP">GBP - British Pound</option>
+                                <option value="INR">INR - Indian Rupee</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Language</label>
+                            <select
+                                value={language}
+                                onChange={(e) => setLanguage(e.target.value as any)}
+                                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-black dark:focus:ring-white"
+                            >
+                                <option value="en">English</option>
+                                <option value="es">Spanish</option>
+                            </select>
+                        </div>
+                        <button
+                            onClick={() => setShowAppSettings(false)}
+                            className="w-full px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-medium hover:scale-105 transition mt-4"
+                        >
+                            Done
+                        </button>
+                    </div>
+                </ModalWrapper>
+            )}
+
+            {/* Logout Confirmation Dialog */}
+            <ConfirmDialog
+                isOpen={showLogoutConfirm}
+                onClose={() => setShowLogoutConfirm(false)}
+                onConfirm={handleLogout}
+                title="Logout"
+                message="Are you sure you want to logout?"
+                confirmText="Logout"
+                cancelText="Cancel"
+                variant="danger"
+            />
         </div>
     );
 };
