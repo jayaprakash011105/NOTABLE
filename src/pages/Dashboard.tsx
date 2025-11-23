@@ -96,7 +96,7 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24">
+        <div className="min-h-screen bg-gray-50 dark:bg-black pb-24">
             <div className="max-w-md mx-auto px-4 py-6">
                 <Header userName="John" />
                 <BalanceCard />

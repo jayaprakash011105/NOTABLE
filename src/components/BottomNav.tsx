@@ -10,7 +10,7 @@ const BottomNav = () => {
     ];
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 z-50">
+        <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-black border-t border-gray-200 dark:border-gray-800 z-50">
             <div className="max-w-md mx-auto px-4">
                 <div className="flex items-center justify-between py-1.5">
                     {navItems.map((item) => (
@@ -31,8 +31,8 @@ const BottomNav = () => {
                                     <div className="w-5 h-5 flex items-center justify-center">
                                         <item.icon
                                             className={`w-4 h-4 transition-colors duration-150 ${isActive
-                                                    ? 'text-white dark:text-black'
-                                                    : 'text-gray-500 dark:text-gray-400'
+                                                ? 'text-white dark:text-black'
+                                                : 'text-gray-500 dark:text-gray-400'
                                                 }`}
                                             strokeWidth={2}
                                         />
@@ -41,8 +41,8 @@ const BottomNav = () => {
                                     {/* Label - compact */}
                                     <span
                                         className={`text-[10px] font-medium transition-colors duration-150 whitespace-nowrap ${isActive
-                                                ? 'text-white dark:text-black'
-                                                : 'text-gray-500 dark:text-gray-400'
+                                            ? 'text-white dark:text-black'
+                                            : 'text-gray-500 dark:text-gray-400'
                                             }`}
                                     >
                                         {item.label}

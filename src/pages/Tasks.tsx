@@ -95,7 +95,7 @@ const Tasks = () => {
     });
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-32">
+        <div className="min-h-screen bg-gray-50 dark:bg-black pb-32">
             <div className="max-w-md mx-auto px-4 py-6">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
@@ -140,8 +140,8 @@ const Tasks = () => {
                             key={filter}
                             onClick={() => setActiveFilter(filter as typeof activeFilter)}
                             className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 ${activeFilter === filter
-                                    ? 'bg-black dark:bg-white text-white dark:text-black scale-105'
-                                    : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 hover:scale-105'
+                                ? 'bg-black dark:bg-white text-white dark:text-black scale-105'
+                                : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 hover:scale-105'
                                 }`}
                         >
                             {filter.charAt(0).toUpperCase() + filter.slice(1)}

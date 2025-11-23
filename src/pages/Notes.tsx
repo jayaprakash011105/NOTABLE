@@ -173,7 +173,7 @@ const Notes = () => {
     );
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-32">
+        <div className="min-h-screen bg-gray-50 dark:bg-black pb-32">
             <div className="max-w-md mx-auto px-4 py-6">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
