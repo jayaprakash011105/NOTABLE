@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Search, Bell, Wallet, TrendingUp, Plus, ChevronRight, X } from 'lucide-react';
+import { Search, Bell, Plus, ChevronRight, X } from 'lucide-react';
 import { useCurrency } from '../contexts/CurrencyContext';
 import ModalWrapper from '../components/ModalWrapper';
 import TransactionForm from '../components/TransactionForm';
@@ -52,7 +52,7 @@ const Finance = () => {
     });
 
     // Load budget categories from localStorage or use default
-    const [budgetCategories, setBudgetCategories] = useState<BudgetCategory[]>(() => {
+    const [budgetCategories] = useState<BudgetCategory[]>(() => {
         const saved = localStorage.getItem('budgetCategories');
         return saved ? JSON.parse(saved) : [
             { id: 1, name: 'Home', total: 2000, icon: '🏠' },
@@ -70,7 +70,7 @@ const Finance = () => {
     });
 
     // Savings goal
-    const [savingsGoal, setSavingsGoal] = useState(() => {
+    const [savingsGoal] = useState(() => {
         const saved = localStorage.getItem('savingsGoal');
         return saved ? parseFloat(saved) : 10000;
     });
@@ -542,7 +542,7 @@ const Finance = () => {
             {showAddTransaction && (
                 <ModalWrapper onClose={() => setShowAddTransaction(false)} title="Add Transaction">
                     <TransactionForm
-                        onSubmit={handleAddTransaction}
+                        onSave={handleAddTransaction}
                         onCancel={() => setShowAddTransaction(false)}
                     />
                 </ModalWrapper>
@@ -553,7 +553,7 @@ const Finance = () => {
                 <ModalWrapper onClose={() => setEditingTransaction(null)} title="Edit Transaction">
                     <TransactionForm
                         transaction={editingTransaction}
-                        onSubmit={handleEditTransaction}
+                        onSave={handleEditTransaction}
                         onCancel={() => setEditingTransaction(null)}
                     />
                 </ModalWrapper>
@@ -577,7 +577,7 @@ const Finance = () => {
                 <ModalWrapper onClose={() => setShowBudgetEdit(false)} title="Edit Monthly Budget">
                     <BudgetForm
                         budget={{ total: monthlyBudgetLimit, spent: calculations.totalBudgetSpent }}
-                        onSubmit={handleSaveBudget}
+                        onSave={handleSaveBudget}
                         onCancel={() => setShowBudgetEdit(false)}
                     />
                 </ModalWrapper>
