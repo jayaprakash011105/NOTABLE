@@ -20,9 +20,9 @@ interface MenuItem {
 const Profile = () => {
     const navigate = useNavigate();
     const { userName, userEmail, setUserName, setUserEmail } = useUser();
-    const { theme, toggleTheme } = useTheme();
-    const { currency, setCurrency } = useCurrency();
-    const { language, setLanguage } = useLanguage();
+    const { isDark, toggleTheme } = useTheme();
+    const { currency, changeCurrency } = useCurrency();
+    const { changeLanguage } = useLanguage();
 
     // Modal states
     const [showEditProfile, setShowEditProfile] = useState(false);
@@ -33,10 +33,37 @@ const Profile = () => {
     const [editName, setEditName] = useState(userName);
     const [editEmail, setEditEmail] = useState(userEmail);
 
+    // App Settings
+    const [selectedCurrency, setSelectedCurrency] = useState(currency.code);
+    const [selectedLanguage, setSelectedLanguage] = useState('en');
+
+    // Notification preferences
+    const [emailNotifications, setEmailNotifications] = useState(() => {
+        const saved = localStorage.getItem('emailNotifications');
+        return saved ? JSON.parse(saved) : true;
+    });
+    const [pushNotifications, setPushNotifications] = useState(() => {
+        const saved = localStorage.getItem('pushNotifications');
+        return saved ? JSON.parse(saved) : true;
+    });
+    const [taskReminders, setTaskReminders] = useState(() => {
+        const saved = localStorage.getItem('taskReminders');
+        return saved ? JSON.parse(saved) : true;
+    });
+
     const handleSaveProfile = () => {
         setUserName(editName);
         setUserEmail(editEmail);
         setShowEditProfile(false);
+    };
+
+    const handleSaveAppSettings = () => {
+        changeCurrency(selectedCurrency);
+        changeLanguage(selectedLanguage);
+        localStorage.setItem('emailNotifications', JSON.stringify(emailNotifications));
+        localStorage.setItem('pushNotifications', JSON.stringify(pushNotifications));
+        localStorage.setItem('taskReminders', JSON.stringify(taskReminders));
+        setShowAppSettings(false);
     };
 
     const handleLogout = () => {
@@ -99,19 +126,19 @@ const Profile = () => {
                             <span className="font-medium text-gray-900 dark:text-gray-100">Theme</span>
                             <button
                                 onClick={toggleTheme}
-                                className={`relative w-14 h-8 rounded-full transition-colors duration-300 ${theme === 'dark' ? 'bg-blue-500' : 'bg-gray-300'
+                                className={`relative w-14 h-8 rounded-full transition-colors duration-300 ${isDark ? 'bg-blue-500' : 'bg-gray-300'
                                     }`}
                             >
                                 <div
-                                    className={`absolute top-1 left-1 w-6 h-6 rounded-full bg-white shadow-md transition-transform duration-300 flex items-center justify-center ${theme === 'dark' ? 'translate-x-6' : 'translate-x-0'
+                                    className={`absolute top-1 left-1 w-6 h-6 rounded-full bg-white shadow-md transition-transform duration-300 flex items-center justify-center ${isDark ? 'translate-x-6' : 'translate-x-0'
                                         }`}
                                 >
-                                    {theme === 'dark' ? '🌙' : '☀️'}
+                                    {isDark ? '🌙' : '☀️'}
                                 </div>
                             </button>
                         </div>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                            Current: {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+                            Current: {isDark ? 'Dark Mode' : 'Light Mode'}
                         </p>
                     </div>
                 </div>
@@ -212,12 +239,13 @@ const Profile = () => {
                     onClose={() => setShowAppSettings(false)}
                     title="App Settings"
                 >
-                    <div className="space-y-4">
+                    <div className="space-y-6">
+                        {/* Currency */}
                         <div>
                             <label className="block text-sm font-medium mb-2">Currency</label>
                             <select
-                                value={currency}
-                                onChange={(e) => setCurrency(e.target.value as any)}
+                                value={selectedCurrency}
+                                onChange={(e) => setSelectedCurrency(e.target.value)}
                                 className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-black dark:focus:ring-white"
                             >
                                 <option value="USD">USD - US Dollar</option>
@@ -226,22 +254,84 @@ const Profile = () => {
                                 <option value="INR">INR - Indian Rupee</option>
                             </select>
                         </div>
+
+                        {/* Language */}
                         <div>
                             <label className="block text-sm font-medium mb-2">Language</label>
                             <select
-                                value={language}
-                                onChange={(e) => setLanguage(e.target.value as any)}
+                                value={selectedLanguage}
+                                onChange={(e) => setSelectedLanguage(e.target.value)}
                                 className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-black dark:focus:ring-white"
                             >
                                 <option value="en">English</option>
                                 <option value="es">Spanish</option>
                             </select>
                         </div>
+
+                        {/* Notifications Section */}
+                        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <h3 className="text-sm font-semibold mb-4">Notification Preferences</h3>
+
+                            {/* Email Notifications */}
+                            <div className="flex items-center justify-between mb-4">
+                                <div>
+                                    <p className="font-medium text-sm">Email Notifications</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Receive updates via email</p>
+                                </div>
+                                <button
+                                    onClick={() => setEmailNotifications(!emailNotifications)}
+                                    className={`relative w-12 h-7 rounded-full transition-colors duration-300 ${emailNotifications ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+                                        }`}
+                                >
+                                    <div
+                                        className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-300 ${emailNotifications ? 'translate-x-5' : 'translate-x-0'
+                                            }`}
+                                    />
+                                </button>
+                            </div>
+
+                            {/* Push Notifications */}
+                            <div className="flex items-center justify-between mb-4">
+                                <div>
+                                    <p className="font-medium text-sm">Push Notifications</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Receive browser notifications</p>
+                                </div>
+                                <button
+                                    onClick={() => setPushNotifications(!pushNotifications)}
+                                    className={`relative w-12 h-7 rounded-full transition-colors duration-300 ${pushNotifications ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+                                        }`}
+                                >
+                                    <div
+                                        className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-300 ${pushNotifications ? 'translate-x-5' : 'translate-x-0'
+                                            }`}
+                                    />
+                                </button>
+                            </div>
+
+                            {/* Task Reminders */}
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="font-medium text-sm">Task Reminders</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Get reminded about tasks</p>
+                                </div>
+                                <button
+                                    onClick={() => setTaskReminders(!taskReminders)}
+                                    className={`relative w-12 h-7 rounded-full transition-colors duration-300 ${taskReminders ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+                                        }`}
+                                >
+                                    <div
+                                        className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-300 ${taskReminders ? 'translate-x-5' : 'translate-x-0'
+                                            }`}
+                                    />
+                                </button>
+                            </div>
+                        </div>
+
                         <button
-                            onClick={() => setShowAppSettings(false)}
+                            onClick={handleSaveAppSettings}
                             className="w-full px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-medium hover:scale-105 transition mt-4"
                         >
-                            Done
+                            Save Settings
                         </button>
                     </div>
                 </ModalWrapper>
