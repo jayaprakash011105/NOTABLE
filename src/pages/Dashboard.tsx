@@ -37,10 +37,10 @@ const Dashboard = () => {
     const [editingText, setEditingText] = useState('');
 
     const categories = [
-        { name: 'Personal', color: 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200' },
-        { name: 'Health', color: 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' },
-        { name: 'Work', color: 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200' },
-        { name: 'Food', color: 'bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200' },
+        { name: 'Personal', color: 'bg-purple-100 dark:bg-gray-700 text-purple-800 dark:text-gray-200' },
+        { name: 'Health', color: 'bg-green-100 dark:bg-gray-700 text-green-800 dark:text-gray-200' },
+        { name: 'Work', color: 'bg-blue-100 dark:bg-gray-700 text-blue-800 dark:text-gray-200' },
+        { name: 'Food', color: 'bg-orange-100 dark:bg-gray-700 text-orange-800 dark:text-gray-200' },
     ];
 
     // Save tasks to localStorage whenever they change
@@ -222,13 +222,13 @@ const Dashboard = () => {
                                             )}
                                             <button
                                                 onClick={() => handleStartEdit(task)}
-                                                className="w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200"
+                                                className="w-7 h-7 rounded-full bg-blue-100 dark:bg-gray-700 text-blue-600 dark:text-gray-200 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200"
                                             >
                                                 <Edit2 className="w-3.5 h-3.5" />
                                             </button>
                                             <button
                                                 onClick={() => handleDeleteTask(task.id)}
-                                                className="w-7 h-7 rounded-full bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200"
+                                                className="w-7 h-7 rounded-full bg-red-100 dark:bg-gray-700 text-red-600 dark:text-gray-200 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200"
                                             >
                                                 <X className="w-3.5 h-3.5" />
                                             </button>
