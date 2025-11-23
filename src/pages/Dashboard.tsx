@@ -99,7 +99,7 @@ const Dashboard = () => {
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-24">
             <div className="max-w-md mx-auto px-4 py-6">
                 <Header userName="John" />
-                <BalanceCard balance={1200} income={1200} expense={600} />
+                <BalanceCard />
 
                 {/* Quick Tasks Section - Enhanced with Edit */}
                 <div className="mb-6">

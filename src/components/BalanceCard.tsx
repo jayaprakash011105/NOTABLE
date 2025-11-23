@@ -1,24 +1,72 @@
-import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useCurrency } from '../contexts/CurrencyContext';
-import { useTranslation } from 'react-i18next';
 
-interface BalanceCardProps {
-    balance: number;
-    income: number;
-    expense: number;
+interface Transaction {
+    id: number;
+    name: string;
+    amount: number;
+    category: string;
+    date: string;
+    type?: 'income' | 'expense';
 }
 
-const BalanceCard = ({ balance, income, expense }: BalanceCardProps) => {
+const BalanceCard = () => {
     const { formatAmount } = useCurrency();
-    const { t } = useTranslation();
     const [showMonthDropdown, setShowMonthDropdown] = useState(false);
-    const [selectedMonth, setSelectedMonth] = useState('December');
+    const [selectedMonth, setSelectedMonth] = useState(() => {
+        const currentMonth = new Date().getMonth();
+        return months[currentMonth];
+    });
+    const [balance, setBalance] = useState(0);
+    const [income, setIncome] = useState(0);
+    const [expense, setExpense] = useState(0);
 
     const months = [
         'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'
     ];
+
+    useEffect(() => {
+        calculateFinancials();
+    }, [selectedMonth]);
+
+    const calculateFinancials = () => {
+        // Load transactions from localStorage
+        const loadedTransactions = localStorage.getItem('transactions');
+        const transactions: Transaction[] = loadedTransactions ? JSON.parse(loadedTransactions) : [];
+
+        // Get selected month index
+        const monthIndex = months.indexOf(selectedMonth);
+        const currentYear = new Date().getFullYear();
+
+        // Filter transactions for selected month
+        const monthTransactions = transactions.filter(t => {
+            const transactionDate = new Date(t.date);
+            return (
+                transactionDate.getMonth() === monthIndex &&
+                transactionDate.getFullYear() === currentYear
+            );
+        });
+
+        // Calculate income and expense
+        let totalIncome = 0;
+        let totalExpense = 0;
+
+        monthTransactions.forEach(transaction => {
+            if (transaction.type === 'income' || transaction.amount > 0) {
+                totalIncome += Math.abs(transaction.amount);
+            } else if (transaction.type === 'expense' || transaction.amount < 0) {
+                totalExpense += Math.abs(transaction.amount);
+            }
+        });
+
+        // Calculate balance
+        const totalBalance = totalIncome - totalExpense;
+
+        setIncome(totalIncome);
+        setExpense(totalExpense);
+        setBalance(totalBalance);
+    };
 
     const handleMonthSelect = (month: string) => {
         setSelectedMonth(month);
@@ -29,7 +77,7 @@ const BalanceCard = ({ balance, income, expense }: BalanceCardProps) => {
         <div className="bg-white dark:bg-gray-800 rounded-3xl p-5 md:p-6 shadow-sm mb-4">
             <div className="flex items-center justify-between mb-2">
                 <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
-                    {t('totalBalance')}
+                    Total balance
                 </p>
                 <div className="relative">
                     <button
@@ -72,7 +120,7 @@ const BalanceCard = ({ balance, income, expense }: BalanceCardProps) => {
                         </svg>
                     </div>
                     <div>
-                        <p className="text-xs text-gray-400">{t('income')}</p>
+                        <p className="text-xs text-gray-400">Income</p>
                         <p className="text-lg font-semibold text-white">{formatAmount(income)}</p>
                     </div>
                 </div>
@@ -84,7 +132,7 @@ const BalanceCard = ({ balance, income, expense }: BalanceCardProps) => {
                         </svg>
                     </div>
                     <div>
-                        <p className="text-xs text-gray-400">{t('expense')}</p>
+                        <p className="text-xs text-gray-400">Expense</p>
                         <p className="text-lg font-semibold text-white">{formatAmount(expense)}</p>
                     </div>
                 </div>
