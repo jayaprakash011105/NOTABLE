@@ -45,7 +45,7 @@ interface HealthData {
     waterLogs: WaterLog[];
     exerciseLogs: ExerciseLog[];
     mealLogs: MealLog[];
-    sleep: { hours: number; quality: number; goal: number };
+    sleep: { hours: number; quality: number; goal: number; bedtime?: string; wakeTime?: string };
     mood: number;
     goals: {
         water: number;
@@ -617,7 +617,7 @@ const Health = () => {
                         )}
                     </div>
 
-                    {/* Sleep Tracker */}
+                    {/* Sleep Tracker - Enhanced */}
                     <div className="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-sm">
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-3">
@@ -627,18 +627,58 @@ const Health = () => {
                                 <div>
                                     <h3 className="font-semibold">Sleep</h3>
                                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                                        {healthData.sleep.hours > 0 ? `${healthData.sleep.hours}/${healthData.sleep.goal} hours` : 'Not logged'}
+                                        {safeSleep.hours > 0 ? `${safeSleep.hours}/${safeSleep.goal} hours` : 'Not logged'}
                                     </p>
                                 </div>
                             </div>
                             <button
                                 onClick={() => {
-                                    const hours = prompt('Enter sleep hours:');
-                                    const quality = prompt('Rate quality (1-5):');
-                                    if (hours && quality) {
+                                    const bedtime = prompt('Bedtime (e.g., 23:00 or 11:00 PM):');
+                                    const wakeTime = prompt('Wake time (e.g., 07:00 or 7:00 AM):');
+                                    const quality = prompt('Sleep quality (1-5):\n1 = Poor\n2 = Fair\n3 = Good\n4 = Very Good\n5 = Excellent');
+
+                                    if (bedtime && wakeTime && quality) {
+                                        // Calculate sleep duration
+                                        const calculateDuration = (bed: string, wake: string) => {
+                                            const parseTime = (time: string) => {
+                                                const cleaned = time.trim().toLowerCase();
+                                                let hours = 0, minutes = 0;
+
+                                                if (cleaned.includes('pm') || cleaned.includes('am')) {
+                                                    const parts = cleaned.replace(/[ap]m/g, '').trim().split(':');
+                                                    hours = parseInt(parts[0]);
+                                                    minutes = parts[1] ? parseInt(parts[1]) : 0;
+                                                    if (cleaned.includes('pm') && hours !== 12) hours += 12;
+                                                    if (cleaned.includes('am') && hours === 12) hours = 0;
+                                                } else {
+                                                    const parts = cleaned.split(':');
+                                                    hours = parseInt(parts[0]);
+                                                    minutes = parts[1] ? parseInt(parts[1]) : 0;
+                                                }
+
+                                                return hours + minutes / 60;
+                                            };
+
+                                            let bedHours = parseTime(bed);
+                                            let wakeHours = parseTime(wake);
+
+                                            // If wake time is earlier than bedtime, add 24 hours
+                                            if (wakeHours < bedHours) wakeHours += 24;
+
+                                            return Math.round((wakeHours - bedHours) * 10) / 10;
+                                        };
+
+                                        const duration = calculateDuration(bedtime, wakeTime);
+
                                         setHealthData(prev => ({
                                             ...prev,
-                                            sleep: { ...prev.sleep, hours: parseFloat(hours), quality: parseInt(quality) }
+                                            sleep: {
+                                                ...prev.sleep,
+                                                hours: duration,
+                                                quality: parseInt(quality),
+                                                bedtime,
+                                                wakeTime
+                                            }
                                         }));
                                     }
                                 }}
@@ -647,13 +687,62 @@ const Health = () => {
                                 <Plus className="w-4 h-4" />
                             </button>
                         </div>
-                        {healthData.sleep.quality > 0 && (
-                            <div className="flex gap-1">
-                                {[1, 2, 3, 4, 5].map((star) => (
-                                    <span key={star} className={star <= healthData.sleep.quality ? 'text-yellow-500' : 'text-gray-300'}>
-                                        ⭐
-                                    </span>
-                                ))}
+
+                        {/* Sleep Progress Bar */}
+                        {safeSleep.hours > 0 && (
+                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-3">
+                                <div
+                                    className="bg-purple-500 h-2 rounded-full transition-all"
+                                    style={{ width: `${Math.min((safeSleep.hours / safeSleep.goal) * 100, 100)}%` }}
+                                />
+                            </div>
+                        )}
+
+                        {/* Sleep Quality Stars */}
+                        {safeSleep.quality > 0 && (
+                            <div className="mb-3">
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Quality</p>
+                                <div className="flex gap-1">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <span key={star} className={star <= safeSleep.quality ? 'text-yellow-500 text-lg' : 'text-gray-300 text-lg'}>
+                                            ⭐
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Sleep Details */}
+                        {safeSleep.hours > 0 && (
+                            <div className="space-y-2 mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                                {healthData.sleep?.bedtime && healthData.sleep?.wakeTime && (
+                                    <div className="grid grid-cols-2 gap-2 text-sm">
+                                        <div className="bg-gray-50 dark:bg-gray-900 p-2 rounded-lg">
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Bedtime</p>
+                                            <p className="font-semibold">{healthData.sleep.bedtime}</p>
+                                        </div>
+                                        <div className="bg-gray-50 dark:bg-gray-900 p-2 rounded-lg">
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Wake Time</p>
+                                            <p className="font-semibold">{healthData.sleep.wakeTime}</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Sleep Cycle Analysis */}
+                                <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg">
+                                    <p className="text-xs font-semibold mb-1">Sleep Analysis</p>
+                                    <p className="text-xs text-gray-600 dark:text-gray-300">
+                                        {safeSleep.hours < 6 ? '⚠️ Insufficient sleep. Aim for 7-9 hours.' :
+                                            safeSleep.hours >= 6 && safeSleep.hours < 7 ? '😴 Below recommended. Try for 7-8 hours.' :
+                                                safeSleep.hours >= 7 && safeSleep.hours <= 9 ? '✅ Optimal sleep duration!' :
+                                                    '😴 Possibly too much sleep. 7-9 hours is ideal.'}
+                                    </p>
+                                    {safeSleep.hours > 0 && (
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                            ~{Math.floor(safeSleep.hours / 1.5)} sleep cycles ({(safeSleep.hours / 1.5).toFixed(1)} cycles)
+                                        </p>
+                                    )}
+                                </div>
                             </div>
                         )}
                     </div>
