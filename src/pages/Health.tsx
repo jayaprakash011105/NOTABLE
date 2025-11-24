@@ -298,16 +298,14 @@ const Health = () => {
 
     const calculateHealthScore = () => {
         const goals = healthData.goals || { water: 8, exercise: 60, calories: 2000 };
-        const sleep = healthData.sleep || { hours: 0, quality: 0, goal: 8 };
         const mood = healthData.mood || 0;
 
-        const waterScore = Math.min((totalWater / goals.water) * 20, 20);
-        const exerciseScore = Math.min((totalExercise / goals.exercise) * 25, 25);
-        const sleepScore = sleep.hours > 0 ? Math.min((sleep.hours / sleep.goal) * 25, 25) : 0;
+        const waterScore = Math.min((totalWater / goals.water) * 25, 25);
+        const exerciseScore = Math.min((totalExercise / goals.exercise) * 30, 30);
         const nutritionScore = totalNutrients.calories > 0 ?
-            Math.min((1 - Math.abs(totalNutrients.calories - goals.calories) / goals.calories) * 20, 20) : 0;
-        const moodScore = (mood / 5) * 10;
-        return Math.round(waterScore + exerciseScore + sleepScore + nutritionScore + moodScore);
+            Math.min((1 - Math.abs(totalNutrients.calories - goals.calories) / goals.calories) * 30, 30) : 0;
+        const moodScore = mood > 0 ? (mood / 5) * 15 : 0;
+        return Math.round(waterScore + exerciseScore + nutritionScore + moodScore);
     };
 
     const getPersonalizedAdvice = () => {
@@ -890,8 +888,8 @@ const Health = () => {
                                         key={type}
                                         onClick={() => setExerciseType(type)}
                                         className={`px-3 py-2 rounded-lg text-sm font-medium transition ${exerciseType === type
-                                                ? 'bg-green-500 text-white'
-                                                : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                            ? 'bg-green-500 text-white'
+                                            : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
                                             }`}
                                     >
                                         {type}
