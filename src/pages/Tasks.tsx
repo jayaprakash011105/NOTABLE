@@ -240,7 +240,7 @@ const Tasks = () => {
                                                         {task.time && (
                                                             <span className="text-sm text-gray-400">{task.time}</span>
                                                         )}
-                                                        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                                                        <div className="flex gap-1">
                                                             <button
                                                                 onClick={() => openEditModal(task)}
                                                                 className="p-1.5 hover:bg-gray-700 rounded-lg transition"
@@ -271,39 +271,57 @@ const Tasks = () => {
                                                 </div>
                                             </div>
                                         ) : (
-                                            /* Regular Task */
-                                            <div className="group">
-                                                <div className="flex items-start justify-between mb-1">
-                                                    <h3
-                                                        onClick={() => handleToggleTask(task.id)}
-                                                        className={`font-semibold text-lg cursor-pointer ${task.completed ? 'line-through text-gray-400' : ''
-                                                            }`}
-                                                    >
-                                                        {task.title}
-                                                    </h3>
-                                                    <div className="flex items-center gap-2">
-                                                        {task.time && (
-                                                            <span className="text-sm text-gray-400">{task.time}</span>
+                                            /* Regular Task - Enhanced Design */
+                                            <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all border border-gray-100 dark:border-gray-800">
+                                                <div className="flex items-start justify-between mb-3">
+                                                    <div className="flex-1">
+                                                        <h3
+                                                            onClick={() => handleToggleTask(task.id)}
+                                                            className={`font-semibold text-lg cursor-pointer mb-2 ${task.completed ? 'line-through text-gray-400' : ''}`}
+                                                        >
+                                                            {task.title}
+                                                        </h3>
+                                                        {task.description && (
+                                                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                                                                {task.description}
+                                                            </p>
                                                         )}
-                                                        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                                                            <button
-                                                                onClick={() => openEditModal(task)}
-                                                                className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition"
-                                                            >
-                                                                <Edit2 className="w-4 h-4" />
-                                                            </button>
-                                                            <button
-                                                                onClick={() => setTaskToDelete(task.id)}
-                                                                className="p-1.5 hover:bg-red-100 dark:hover:bg-red-900 rounded-lg transition text-red-500"
-                                                            >
-                                                                <Trash2 className="w-4 h-4" />
-                                                            </button>
+
+                                                        {/* Task Meta Info */}
+                                                        <div className="flex items-center gap-3 flex-wrap">
+                                                            {task.time && (
+                                                                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-medium">
+                                                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                    </svg>
+                                                                    {task.time}
+                                                                </span>
+                                                            )}
+                                                            {task.category && (
+                                                                <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium ${CATEGORIES.find(c => c.value === task.category)?.color || 'bg-gray-100 dark:bg-gray-800'
+                                                                    }`}>
+                                                                    {CATEGORIES.find(c => c.value === task.category)?.label || task.category}
+                                                                </span>
+                                                            )}
                                                         </div>
                                                     </div>
+
+                                                    {/* Action Buttons */}
+                                                    <div className="flex items-center gap-2 ml-4">
+                                                        <button
+                                                            onClick={() => openEditModal(task)}
+                                                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition text-gray-600 dark:text-gray-400"
+                                                        >
+                                                            <Edit2 className="w-4 h-4" />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setTaskToDelete(task.id)}
+                                                            className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition text-red-500"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                                {task.description && (
-                                                    <p className="text-sm text-gray-400">{task.description}</p>
-                                                )}
                                             </div>
                                         )}
                                     </div>
