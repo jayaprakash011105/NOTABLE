@@ -161,8 +161,8 @@ const Tasks = () => {
                             key={index}
                             onClick={() => setSelectedDay(day.number)}
                             className={`flex-shrink-0 transition-all duration-300 ${selectedDay === day.number
-                                    ? 'bg-gray-800 dark:bg-gray-700 text-white px-6 py-4 rounded-3xl'
-                                    : 'flex flex-col items-center px-4'
+                                ? 'bg-gray-800 dark:bg-gray-700 text-white px-6 py-4 rounded-3xl'
+                                : 'flex flex-col items-center px-4'
                                 }`}
                         >
                             <span className={`text-sm ${selectedDay === day.number ? 'mb-1' : 'text-gray-400'}`}>
@@ -191,10 +191,10 @@ const Tasks = () => {
                                     {/* Timeline Dot */}
                                     <div
                                         className={`relative z-10 flex-shrink-0 w-10 h-10 rounded-full border-4 flex items-center justify-center transition-all ${task.completed
+                                            ? 'bg-gray-800 dark:bg-gray-700 border-gray-100 dark:border-gray-900'
+                                            : task.featured
                                                 ? 'bg-gray-800 dark:bg-gray-700 border-gray-100 dark:border-gray-900'
-                                                : task.featured
-                                                    ? 'bg-gray-800 dark:bg-gray-700 border-gray-100 dark:border-gray-900'
-                                                    : 'bg-gray-100 dark:bg-black border-gray-100 dark:border-gray-900'
+                                                : 'bg-gray-100 dark:bg-black border-gray-100 dark:border-gray-900'
                                             }`}
                                     >
                                         {task.completed && (
@@ -251,8 +251,8 @@ const Tasks = () => {
                                                     <button
                                                         onClick={() => handleToggleTask(task.id)}
                                                         className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${task.completed
-                                                                ? 'bg-green-500'
-                                                                : 'bg-white text-gray-800'
+                                                            ? 'bg-green-500'
+                                                            : 'bg-white text-gray-800'
                                                             }`}
                                                     >
                                                         {task.completed && <Check className="w-5 h-5 text-white" />}
@@ -357,13 +357,17 @@ const Tasks = () => {
 
                     <div>
                         <label className="block text-sm font-medium mb-2">Category</label>
-                        <input
-                            type="text"
+                        <select
                             value={taskCategory}
                             onChange={(e) => setTaskCategory(e.target.value)}
-                            placeholder="e.g., Work, Personal, Health"
                             className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        />
+                        >
+                            {CATEGORIES.map((cat) => (
+                                <option key={cat.value} value={cat.value}>
+                                    {cat.label}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -444,13 +448,17 @@ const Tasks = () => {
 
                     <div>
                         <label className="block text-sm font-medium mb-2">Category</label>
-                        <input
-                            type="text"
+                        <select
                             value={taskCategory}
                             onChange={(e) => setTaskCategory(e.target.value)}
-                            placeholder="e.g., Work, Personal, Health"
                             className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        />
+                        >
+                            {CATEGORIES.map((cat) => (
+                                <option key={cat.value} value={cat.value}>
+                                    {cat.label}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     <div className="flex items-center gap-2">
