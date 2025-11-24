@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Activity, Droplet, Moon, Apple, Weight, Heart, TrendingUp, Plus, X, Edit2, Search, Trash2, RotateCcw } from 'lucide-react';
-import { foodDatabase, searchFood, calculateNutrients, FoodItem } from '../utils/foodDatabase';
+import { Activity, Droplet, Moon, Apple, Heart, Plus, Edit2, Search, Trash2, RotateCcw } from 'lucide-react';
+import { searchFood, calculateNutrients, type FoodItem } from '../utils/foodDatabase';
 import ModalWrapper from '../components/ModalWrapper';
 
 interface HealthProfile {
