@@ -308,37 +308,130 @@ const Health = () => {
         return Math.round(waterScore + exerciseScore + nutritionScore + moodScore);
     };
 
+
     const getPersonalizedAdvice = () => {
         const advice = [];
         const bmi = healthProfile.setupComplete ? parseFloat(calculateBMI(healthProfile.weight, healthProfile.height)) : 0;
 
+        // Helper to randomly select from array
+        const randomPick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
+
         if (healthProfile.setupComplete) {
             const bmiInfo = getBMICategory(bmi);
             if (bmi < 18.5) {
-                advice.push({ icon: '⚖️', text: `Your BMI is ${bmi} (${bmiInfo.category}). Consider increasing calorie intake and strength training.`, type: 'info' });
+                const tips = [
+                    `Your BMI is ${bmi} (${bmiInfo.category}). Consider increasing calorie intake and strength training.`,
+                    `BMI ${bmi} suggests you're underweight. Focus on nutrient-dense foods and resistance exercises.`,
+                    `At BMI ${bmi}, aim for 300-500 extra calories daily with protein-rich meals.`
+                ];
+                advice.push({ icon: '⚖️', text: randomPick(tips), type: 'info' });
             } else if (bmi >= 25) {
-                advice.push({ icon: '⚖️', text: `Your BMI is ${bmi} (${bmiInfo.category}). Focus on balanced nutrition and regular exercise.`, type: 'warning' });
+                const tips = [
+                    `Your BMI is ${bmi} (${bmiInfo.category}). Focus on balanced nutrition and regular exercise.`,
+                    `BMI ${bmi} indicates you're overweight. Small dietary changes can make a big difference!`,
+                    `At BMI ${bmi}, aim for 30 minutes of daily activity and portion control.`
+                ];
+                advice.push({ icon: '⚖️', text: randomPick(tips), type: 'warning' });
             }
         }
 
         const goals = healthData.goals || { water: 8, exercise: 60, calories: 2000 };
         const mealLogs = healthData.mealLogs || [];
 
+        // Water advice with variations
         if (totalWater < goals.water * 0.5) {
-            advice.push({ icon: '💧', text: `You're ${Math.round((1 - totalWater / goals.water) * 100)}% below your water goal. Drink ${goals.water - totalWater} more glasses!`, type: 'warning' });
+            const waterTips = [
+                `You're ${Math.round((1 - totalWater / goals.water) * 100)}% below your water goal. Drink ${goals.water - totalWater} more glasses!`,
+                `Dehydration alert! You need ${goals.water - totalWater} more glasses to reach your goal.`,
+                `Stay hydrated! ${goals.water - totalWater} more glasses will get you to your daily target.`,
+                `Your body needs water! Aim for ${goals.water - totalWater} more glasses today.`
+            ];
+            advice.push({ icon: '💧', text: randomPick(waterTips), type: 'warning' });
         } else if (totalWater >= goals.water) {
-            advice.push({ icon: '💧', text: 'Excellent hydration! You\'ve met your personalized water goal! 💧', type: 'success' });
+            const successTips = [
+                'Excellent hydration! You\'ve met your personalized water goal! 💧',
+                'Perfectly hydrated! Your body thanks you! 🌊',
+                'Water goal crushed! Keep up the great work! 💦',
+                'Hydration champion! You\'re taking great care of yourself! 💙'
+            ];
+            advice.push({ icon: '💧', text: randomPick(successTips), type: 'success' });
         }
 
+        // Exercise advice with variations
         if (totalExercise === 0) {
-            const suggestion = healthProfile.activityLevel === 'sedentary' ? '15-minute walk' : '30-minute workout';
-            advice.push({ icon: '🏃', text: `No exercise logged today. Try a ${suggestion}!`, type: 'warning' });
+            const exerciseTips = healthProfile.activityLevel === 'sedentary'
+                ? [
+                    'No exercise logged today. Try a 15-minute walk!',
+                    'Start small! A 15-minute stroll can boost your mood.',
+                    'Get moving! Even 15 minutes of walking helps.',
+                    'Your body craves movement! Take a quick 15-minute walk.'
+                ]
+                : [
+                    'No exercise logged today. Try a 30-minute workout!',
+                    'Time to move! A 30-minute session will energize you.',
+                    'Your muscles are ready! Go for a 30-minute workout.',
+                    'Don\'t skip today! 30 minutes of exercise makes a difference.'
+                ];
+            advice.push({ icon: '🏃', text: randomPick(exerciseTips), type: 'warning' });
         } else if (totalExercise >= goals.exercise) {
-            advice.push({ icon: '🏃', text: 'Amazing! You\'ve hit your personalized exercise goal! 🎉', type: 'success' });
+            const exerciseSuccess = [
+                'Amazing! You\'ve hit your personalized exercise goal! 🎉',
+                'Fitness goal achieved! You\'re unstoppable! 💪',
+                'Exercise goal completed! Tomorrow is another opportunity! 🌟',
+                'You crushed your workout target! Incredible dedication! 🔥'
+            ];
+            advice.push({ icon: '🏃', text: randomPick(exerciseSuccess), type: 'success' });
+        } else if (totalExercise > 0 && totalExercise < goals.exercise) {
+            const progressTips = [
+                `Great start! ${goals.exercise - totalExercise} more minutes to reach your goal.`,
+                `You're on the right track! Keep going for ${goals.exercise - totalExercise} more minutes.`,
+                `Nice progress! Just ${goals.exercise - totalExercise} minutes away from your target.`
+            ];
+            advice.push({ icon: '🏃', text: randomPick(progressTips), type: 'info' });
         }
 
+        // Nutrition advice with variations
         if (totalNutrients.protein < 50 && mealLogs.length > 0) {
-            advice.push({ icon: '🥩', text: `Low protein intake (${totalNutrients.protein.toFixed(1)}g). Add protein-rich foods like chicken, eggs, or lentils.`, type: 'warning' });
+            const proteinTips = [
+                `Low protein intake (${totalNutrients.protein.toFixed(1)}g). Add protein-rich foods like chicken, eggs, or lentils.`,
+                `Boost your protein! Add eggs, fish, or Greek yogurt to reach your target.`,
+                `Only ${totalNutrients.protein.toFixed(1)}g protein today. Try adding nuts, beans, or lean meat.`,
+                `Protein is key for recovery! Add some tofu, chicken, or chickpeas.`
+            ];
+            advice.push({ icon: '🥩', text: randomPick(proteinTips), type: 'warning' });
+        }
+
+        if (totalNutrients.calories > 0 && totalNutrients.calories >= goals.calories * 1.2) {
+            const calorieWarnings = [
+                'You\'ve exceeded your calorie goal. Consider lighter options for dinner.',
+                'Calorie intake is high today. Balance with vegetables and whole grains.',
+                'Over your calorie target. Stay mindful of portion sizes!'
+            ];
+            advice.push({ icon: '🍽️', text: randomPick(calorieWarnings), type: 'warning' });
+        }
+
+        // Motivational tip if doing well
+        if (advice.filter(a => a.type === 'success').length >= 2) {
+            const motivationalTips = [
+                'You\'re crushing it today! Keep this momentum going! 🌟',
+                'Outstanding progress! You\'re building healthy habits! 💫',
+                'Incredible work! Your consistency will pay off! ⭐',
+                'You\'re on fire! This is what success looks like! 🔥'
+            ];
+            advice.push({ icon: '🎯', text: randomPick(motivationalTips), type: 'success' });
+        }
+
+        // General wellness tip when no specific advice
+        if (advice.length === 0) {
+            const generalTips = [
+                'Start your health journey today! Log your first activity.',
+                'Small steps lead to big changes. Begin tracking your wellness!',
+                'Your health matters! Track water, exercise, or meals to get started.',
+                'Today is perfect for building healthy habits. Let\'s begin!',
+                'Wellness journey starts with one step. Log an activity now!',
+                'Take charge of your health today! Start with water or exercise.'
+            ];
+            advice.push({ icon: '✨', text: randomPick(generalTips), type: 'info' });
         }
 
         return advice;
