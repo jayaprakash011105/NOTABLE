@@ -791,7 +791,7 @@ const Health = () => {
                             <div className="space-y-4">
                                 <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-xl">
                                     <p className="font-semibold">{selectedFood.name}</p>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400">{selected Food.category}</p>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">{selectedFood.category}</p>
                                 </div>
 
                                 <div>
