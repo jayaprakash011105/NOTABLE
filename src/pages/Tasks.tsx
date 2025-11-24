@@ -14,6 +14,17 @@ interface Task {
     date: string;
 }
 
+const CATEGORIES = [
+    { value: '', label: 'No Category', color: '' },
+    { value: 'Work', label: '💼 Work', color: 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300' },
+    { value: 'Personal', label: '👤 Personal', color: 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300' },
+    { value: 'Health', label: '💪 Health', color: 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' },
+    { value: 'Learning', label: '📚 Learning', color: 'bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300' },
+    { value: 'Shopping', label: '🛒 Shopping', color: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300' },
+    { value: 'Finance', label: '💰 Finance', color: 'bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300' },
+    { value: 'Social', label: '👥 Social', color: 'bg-pink-100 dark:bg-pink-900 text-pink-700 dark:text-pink-300' },
+];
+
 const Tasks = () => {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [showAddModal, setShowAddModal] = useState(false);
