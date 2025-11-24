@@ -1,34 +1,57 @@
 import { useState, useEffect } from 'react';
-import { Activity, Droplet, Moon, Apple, Weight, Pill, Heart, TrendingUp, Plus, Target, Bell, X, Check } from 'lucide-react';
+import { Activity, Droplet, Moon, Apple, Weight, Heart, TrendingUp, Plus, X, Edit2, Search, Trash2, RotateCcw } from 'lucide-react';
+import { foodDatabase, searchFood, calculateNutrients, FoodItem } from '../utils/foodDatabase';
+import ModalWrapper from '../components/ModalWrapper';
 
 interface HealthProfile {
-    height: number; // cm
-    weight: number; // kg
+    height: number;
+    weight: number;
     age: number;
     gender: 'male' | 'female' | 'other';
     activityLevel: 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
-    healthConditions: string[];
-    fitnessGoals: string[];
     setupComplete: boolean;
+}
+
+interface WaterLog {
+    id: string;
+    amount: number;
+    time: string;
+}
+
+interface ExerciseLog {
+    id: string;
+    minutes: number;
+    type: string;
+    time: string;
+}
+
+interface MealLog {
+    id: string;
+    food: FoodItem;
+    grams: number;
+    nutrients: {
+        calories: number;
+        protein: number;
+        carbs: number;
+        fat: number;
+        fiber: number;
+        sugar: number;
+    };
+    time: string;
 }
 
 interface HealthData {
     date: string;
-    water: { intake: number; goal: number };
-    exercise: { minutes: number; goal: number };
+    waterLogs: WaterLog[];
+    exerciseLogs: ExerciseLog[];
+    mealLogs: MealLog[];
     sleep: { hours: number; quality: number; goal: number };
-    nutrition: { calories: number; goal: number };
-    weight: number;
     mood: number;
-}
-
-interface HealthGoal {
-    metric: string;
-    target: number;
-    current: number;
-    unit: string;
-    reminderEnabled: boolean;
-    reminderTime: string;
+    goals: {
+        water: number;
+        exercise: number;
+        calories: number;
+    };
 }
 
 const Health = () => {
@@ -42,25 +65,28 @@ const Health = () => {
             age: 0,
             gender: 'male',
             activityLevel: 'moderate',
-            healthConditions: [],
-            fitnessGoals: [],
             setupComplete: false
         };
     });
 
     const [showOnboarding, setShowOnboarding] = useState(!healthProfile.setupComplete);
-    const [showGoalSetting, setShowGoalSetting] = useState(false);
-    const [selectedMetric, setSelectedMetric] = useState('');
+    const [showNutritionModal, setShowNutritionModal] = useState(false);
+    const [showWaterEdit, setShowWaterEdit] = useState(false);
+    const [showExerciseEdit, setShowExerciseEdit] = useState(false);
 
-    // Onboarding form state
+    // Nutrition modal state
+    const [foodSearch, setFoodSearch] = useState('');
+    const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
+    const [foodGrams, setFoodGrams] = useState('100');
+    const [searchResults, setSearchResults] = useState<FoodItem[]>([]);
+
+    // Onboarding form
     const [formData, setFormData] = useState({
         height: '',
         weight: '',
         age: '',
         gender: 'male' as 'male' | 'female' | 'other',
         activityLevel: 'moderate' as 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active',
-        healthConditions: [] as string[],
-        fitnessGoals: [] as string[]
     });
 
     const calculateBMI = (weight: number, height: number) => {
@@ -76,14 +102,10 @@ const Health = () => {
     };
 
     const calculatePersonalizedGoals = (profile: HealthProfile) => {
-        // Water goal based on weight (30-35ml per kg)
-        const waterGoal = Math.round((profile.weight * 0.033) / 0.25); // glasses (250ml each)
-
-        // Calorie goal based on BMR and activity level
+        const waterGoal = Math.round((profile.weight * 0.033) / 0.25);
         const bmr = profile.gender === 'male'
             ? 10 * profile.weight + 6.25 * profile.height - 5 * profile.age + 5
             : 10 * profile.weight + 6.25 * profile.height - 5 * profile.age - 161;
-
         const activityMultipliers = {
             sedentary: 1.2,
             light: 1.375,
@@ -91,10 +113,7 @@ const Health = () => {
             active: 1.725,
             very_active: 1.9
         };
-
         const calorieGoal = Math.round(bmr * activityMultipliers[profile.activityLevel]);
-
-        // Exercise goal based on activity level
         const exerciseGoals = {
             sedentary: 30,
             light: 45,
@@ -102,34 +121,29 @@ const Health = () => {
             active: 75,
             very_active: 90
         };
-
         return {
             water: waterGoal,
             calories: calorieGoal,
             exercise: exerciseGoals[profile.activityLevel],
-            sleep: 8
         };
     };
 
     const [healthData, setHealthData] = useState<HealthData>(() => {
         const saved = localStorage.getItem(`health_${today}`);
         if (saved) return JSON.parse(saved);
-
         const goals = healthProfile.setupComplete ? calculatePersonalizedGoals(healthProfile) : {
             water: 8,
             calories: 2000,
             exercise: 60,
-            sleep: 8
         };
-
         return {
             date: today,
-            water: { intake: 0, goal: goals.water },
-            exercise: { minutes: 0, goal: goals.exercise },
-            sleep: { hours: 0, quality: 0, goal: goals.sleep },
-            nutrition: { calories: 0, goal: goals.calories },
-            weight: healthProfile.weight,
-            mood: 0
+            waterLogs: [],
+            exerciseLogs: [],
+            mealLogs: [],
+            sleep: { hours: 0, quality: 0, goal: 8 },
+            mood: 0,
+            goals
         };
     });
 
@@ -141,6 +155,14 @@ const Health = () => {
         localStorage.setItem(`health_${today}`, JSON.stringify(healthData));
     }, [healthData, today]);
 
+    useEffect(() => {
+        if (foodSearch.length > 0) {
+            setSearchResults(searchFood(foodSearch));
+        } else {
+            setSearchResults([]);
+        }
+    }, [foodSearch]);
+
     const handleOnboardingSubmit = () => {
         const profile: HealthProfile = {
             height: parseFloat(formData.height),
@@ -148,35 +170,117 @@ const Health = () => {
             age: parseInt(formData.age),
             gender: formData.gender,
             activityLevel: formData.activityLevel,
-            healthConditions: formData.healthConditions,
-            fitnessGoals: formData.fitnessGoals,
             setupComplete: true
         };
-
         setHealthProfile(profile);
-
-        // Update goals based on profile
         const personalizedGoals = calculatePersonalizedGoals(profile);
         setHealthData(prev => ({
             ...prev,
-            water: { ...prev.water, goal: personalizedGoals.water },
-            exercise: { ...prev.exercise, goal: personalizedGoals.exercise },
-            sleep: { ...prev.sleep, goal: personalizedGoals.sleep },
-            nutrition: { ...prev.nutrition, goal: personalizedGoals.calories },
-            weight: profile.weight
+            goals: personalizedGoals
         }));
-
         setShowOnboarding(false);
     };
 
-    const calculateHealthScore = () => {
-        const waterScore = Math.min((healthData.water.intake / healthData.water.goal) * 20, 20);
-        const exerciseScore = Math.min((healthData.exercise.minutes / healthData.exercise.goal) * 25, 25);
-        const sleepScore = healthData.sleep.hours > 0 ? Math.min((healthData.sleep.hours / healthData.sleep.goal) * 25, 25) : 0;
-        const nutritionScore = healthData.nutrition.calories > 0 ?
-            Math.min((1 - Math.abs(healthData.nutrition.calories - healthData.nutrition.goal) / healthData.nutrition.goal) * 20, 20) : 0;
-        const moodScore = (healthData.mood / 5) * 10;
+    // Water functions
+    const addWater = () => {
+        const newLog: WaterLog = {
+            id: Date.now().toString(),
+            amount: 1,
+            time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+        };
+        setHealthData(prev => ({
+            ...prev,
+            waterLogs: [...prev.waterLogs, newLog]
+        }));
+    };
 
+    const deleteWaterLog = (id: string) => {
+        setHealthData(prev => ({
+            ...prev,
+            waterLogs: prev.waterLogs.filter(log => log.id !== id)
+        }));
+    };
+
+    const undoLastWater = () => {
+        setHealthData(prev => ({
+            ...prev,
+            waterLogs: prev.waterLogs.slice(0, -1)
+        }));
+    };
+
+    // Exercise functions
+    const addExercise = () => {
+        const type = prompt('Exercise type (e.g., Running, Gym, Yoga):');
+        const minutes = prompt('Duration in minutes:');
+        if (type && minutes) {
+            const newLog: ExerciseLog = {
+                id: Date.now().toString(),
+                type,
+                minutes: parseInt(minutes),
+                time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+            };
+            setHealthData(prev => ({
+                ...prev,
+                exerciseLogs: [...prev.exerciseLogs, newLog]
+            }));
+        }
+    };
+
+    const deleteExerciseLog = (id: string) => {
+        setHealthData(prev => ({
+            ...prev,
+            exerciseLogs: prev.exerciseLogs.filter(log => log.id !== id)
+        }));
+    };
+
+    // Nutrition functions
+    const addMeal = () => {
+        if (!selectedFood || !foodGrams) return;
+        const grams = parseFloat(foodGrams);
+        const nutrients = calculateNutrients(selectedFood, grams);
+        const newMeal: MealLog = {
+            id: Date.now().toString(),
+            food: selectedFood,
+            grams,
+            nutrients,
+            time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+        };
+        setHealthData(prev => ({
+            ...prev,
+            mealLogs: [...prev.mealLogs, newMeal]
+        }));
+        setShowNutritionModal(false);
+        setSelectedFood(null);
+        setFoodSearch('');
+        setFoodGrams('100');
+    };
+
+    const deleteMealLog = (id: string) => {
+        setHealthData(prev => ({
+            ...prev,
+            mealLogs: prev.mealLogs.filter(log => log.id !== id)
+        }));
+    };
+
+    // Calculate totals
+    const totalWater = healthData.waterLogs.reduce((sum, log) => sum + log.amount, 0);
+    const totalExercise = healthData.exerciseLogs.reduce((sum, log) => sum + log.minutes, 0);
+    const totalNutrients = healthData.mealLogs.reduce((totals, meal) => ({
+        calories: totals.calories + meal.nutrients.calories,
+        protein: totals.protein + meal.nutrients.protein,
+        carbs: totals.carbs + meal.nutrients.carbs,
+        fat: totals.fat + meal.nutrients.fat,
+        fiber: totals.fiber + meal.nutrients.fiber,
+        sugar: totals.sugar + meal.nutrients.sugar,
+    }), { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0 });
+
+    const calculateHealthScore = () => {
+        const waterScore = Math.min((totalWater / healthData.goals.water) * 20, 20);
+        const exerciseScore = Math.min((totalExercise / healthData.goals.exercise) * 25, 25);
+        const sleepScore = healthData.sleep.hours > 0 ? Math.min((healthData.sleep.hours / healthData.sleep.goal) * 25, 25) : 0;
+        const nutritionScore = totalNutrients.calories > 0 ?
+            Math.min((1 - Math.abs(totalNutrients.calories - healthData.goals.calories) / healthData.goals.calories) * 20, 20) : 0;
+        const moodScore = (healthData.mood / 5) * 10;
         return Math.round(waterScore + exerciseScore + sleepScore + nutritionScore + moodScore);
     };
 
@@ -184,7 +288,6 @@ const Health = () => {
         const advice = [];
         const bmi = healthProfile.setupComplete ? parseFloat(calculateBMI(healthProfile.weight, healthProfile.height)) : 0;
 
-        // BMI-based advice
         if (healthProfile.setupComplete) {
             const bmiInfo = getBMICategory(bmi);
             if (bmi < 18.5) {
@@ -194,31 +297,21 @@ const Health = () => {
             }
         }
 
-        // Water intake advice
-        if (healthData.water.intake < healthData.water.goal * 0.5) {
-            advice.push({ icon: '💧', text: `You're ${Math.round((1 - healthData.water.intake / healthData.water.goal) * 100)}% below your water goal. Drink ${healthData.water.goal - healthData.water.intake} more glasses!`, type: 'warning' });
-        } else if (healthData.water.intake >= healthData.water.goal) {
+        if (totalWater < healthData.goals.water * 0.5) {
+            advice.push({ icon: '💧', text: `You're ${Math.round((1 - totalWater / healthData.goals.water) * 100)}% below your water goal. Drink ${healthData.goals.water - totalWater} more glasses!`, type: 'warning' });
+        } else if (totalWater >= healthData.goals.water) {
             advice.push({ icon: '💧', text: 'Excellent hydration! You\'ve met your personalized water goal! 💧', type: 'success' });
         }
 
-        // Exercise advice based on activity level
-        if (healthData.exercise.minutes === 0) {
+        if (totalExercise === 0) {
             const suggestion = healthProfile.activityLevel === 'sedentary' ? '15-minute walk' : '30-minute workout';
             advice.push({ icon: '🏃', text: `No exercise logged today. Try a ${suggestion}!`, type: 'warning' });
-        } else if (healthData.exercise.minutes >= healthData.exercise.goal) {
+        } else if (totalExercise >= healthData.goals.exercise) {
             advice.push({ icon: '🏃', text: 'Amazing! You\'ve hit your personalized exercise goal! 🎉', type: 'success' });
         }
 
-        // Sleep advice
-        if (healthData.sleep.hours > 0 && healthData.sleep.hours < 6) {
-            advice.push({ icon: '😴', text: 'You got less than 6 hours of sleep. Aim for 7-8 hours for optimal health.', type: 'warning' });
-        } else if (healthData.sleep.hours >= 7 && healthData.sleep.hours <= 9) {
-            advice.push({ icon: '😴', text: 'Perfect sleep duration! Quality rest is essential for recovery! 😴', type: 'success' });
-        }
-
-        // Age-specific advice
-        if (healthProfile.age > 50 && healthData.exercise.minutes < 30) {
-            advice.push({ icon: '🧘', text: 'At your age, regular moderate exercise helps maintain bone density and muscle mass.', type: 'info' });
+        if (totalNutrients.protein < 50 && healthData.mealLogs.length > 0) {
+            advice.push({ icon: '🥩', text: `Low protein intake (${totalNutrients.protein.toFixed(1)}g). Add protein-rich foods like chicken, eggs, or lentils.`, type: 'warning' });
         }
 
         return advice;
@@ -242,7 +335,6 @@ const Health = () => {
                     </div>
 
                     <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 space-y-6">
-                        {/* Basic Info */}
                         <div>
                             <h3 className="font-semibold mb-4">Basic Information</h3>
                             <div className="space-y-4">
@@ -291,7 +383,6 @@ const Health = () => {
                             </div>
                         </div>
 
-                        {/* Activity Level */}
                         <div>
                             <h3 className="font-semibold mb-4">Activity Level</h3>
                             <select
@@ -307,7 +398,6 @@ const Health = () => {
                             </select>
                         </div>
 
-                        {/* BMI Preview */}
                         {formData.height && formData.weight && (
                             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-4">
                                 <p className="text-sm font-medium mb-1">Your BMI</p>
@@ -374,8 +464,8 @@ const Health = () => {
                             <div
                                 key={index}
                                 className={`p-4 rounded-2xl ${item.type === 'success' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200' :
-                                        item.type === 'warning' ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200' :
-                                            'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200'
+                                    item.type === 'warning' ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200' :
+                                        'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200'
                                     }`}
                             >
                                 <p className="text-sm font-medium">{item.icon} {item.text}</p>
@@ -396,34 +486,54 @@ const Health = () => {
                                 <div>
                                     <h3 className="font-semibold">Water Intake</h3>
                                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                                        {healthData.water.intake}/{healthData.water.goal} glasses
+                                        {totalWater}/{healthData.goals.water} glasses
                                     </p>
                                 </div>
                             </div>
                             <div className="flex gap-2">
+                                {healthData.waterLogs.length > 0 && (
+                                    <button
+                                        onClick={undoLastWater}
+                                        className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center hover:scale-110 transition"
+                                    >
+                                        <RotateCcw className="w-4 h-4" />
+                                    </button>
+                                )}
                                 <button
-                                    onClick={() => setShowGoalSetting(true)}
+                                    onClick={() => setShowWaterEdit(!showWaterEdit)}
                                     className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center hover:scale-110 transition"
                                 >
-                                    <Target className="w-4 h-4" />
+                                    <Edit2 className="w-4 h-4" />
                                 </button>
                                 <button
-                                    onClick={() => setHealthData(prev => ({
-                                        ...prev,
-                                        water: { ...prev.water, intake: prev.water.intake + 1 }
-                                    }))}
+                                    onClick={addWater}
                                     className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center hover:scale-110 transition"
                                 >
                                     <Plus className="w-4 h-4" />
                                 </button>
                             </div>
                         </div>
-                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-3">
                             <div
                                 className="bg-blue-500 h-2 rounded-full transition-all"
-                                style={{ width: `${Math.min((healthData.water.intake / healthData.water.goal) * 100, 100)}%` }}
+                                style={{ width: `${Math.min((totalWater / healthData.goals.water) * 100, 100)}%` }}
                             />
                         </div>
+                        {showWaterEdit && healthData.waterLogs.length > 0 && (
+                            <div className="space-y-2 mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                                {healthData.waterLogs.map((log) => (
+                                    <div key={log.id} className="flex items-center justify-between text-sm">
+                                        <span>{log.amount} glass at {log.time}</span>
+                                        <button
+                                            onClick={() => deleteWaterLog(log.id)}
+                                            className="text-red-500 hover:text-red-700"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Exercise Tracker */}
@@ -436,31 +546,46 @@ const Health = () => {
                                 <div>
                                     <h3 className="font-semibold">Exercise</h3>
                                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                                        {healthData.exercise.minutes}/{healthData.exercise.goal} min
+                                        {totalExercise}/{healthData.goals.exercise} min
                                     </p>
                                 </div>
                             </div>
-                            <button
-                                onClick={() => {
-                                    const minutes = prompt('Enter exercise minutes:');
-                                    if (minutes) {
-                                        setHealthData(prev => ({
-                                            ...prev,
-                                            exercise: { ...prev.exercise, minutes: prev.exercise.minutes + parseInt(minutes) }
-                                        }));
-                                    }
-                                }}
-                                className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center hover:scale-110 transition"
-                            >
-                                <Plus className="w-4 h-4" />
-                            </button>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setShowExerciseEdit(!showExerciseEdit)}
+                                    className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center hover:scale-110 transition"
+                                >
+                                    <Edit2 className="w-4 h-4" />
+                                </button>
+                                <button
+                                    onClick={addExercise}
+                                    className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center hover:scale-110 transition"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                </button>
+                            </div>
                         </div>
-                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-3">
                             <div
                                 className="bg-green-500 h-2 rounded-full transition-all"
-                                style={{ width: `${Math.min((healthData.exercise.minutes / healthData.exercise.goal) * 100, 100)}%` }}
+                                style={{ width: `${Math.min((totalExercise / healthData.goals.exercise) * 100, 100)}%` }}
                             />
                         </div>
+                        {showExerciseEdit && healthData.exerciseLogs.length > 0 && (
+                            <div className="space-y-2 mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                                {healthData.exerciseLogs.map((log) => (
+                                    <div key={log.id} className="flex items-center justify-between text-sm">
+                                        <span>{log.type} - {log.minutes} min at {log.time}</span>
+                                        <button
+                                            onClick={() => deleteExerciseLog(log.id)}
+                                            className="text-red-500 hover:text-red-700"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Sleep Tracker */}
@@ -514,31 +639,65 @@ const Health = () => {
                                 <div>
                                     <h3 className="font-semibold">Nutrition</h3>
                                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                                        {healthData.nutrition.calories}/{healthData.nutrition.goal} cal
+                                        {totalNutrients.calories}/{healthData.goals.calories} cal
                                     </p>
                                 </div>
                             </div>
                             <button
-                                onClick={() => {
-                                    const calories = prompt('Enter calories:');
-                                    if (calories) {
-                                        setHealthData(prev => ({
-                                            ...prev,
-                                            nutrition: { ...prev.nutrition, calories: prev.nutrition.calories + parseInt(calories) }
-                                        }));
-                                    }
-                                }}
+                                onClick={() => setShowNutritionModal(true)}
                                 className="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center hover:scale-110 transition"
                             >
                                 <Plus className="w-4 h-4" />
                             </button>
                         </div>
-                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-3">
                             <div
                                 className="bg-orange-500 h-2 rounded-full transition-all"
-                                style={{ width: `${Math.min((healthData.nutrition.calories / healthData.nutrition.goal) * 100, 100)}%` }}
+                                style={{ width: `${Math.min((totalNutrients.calories / healthData.goals.calories) * 100, 100)}%` }}
                             />
                         </div>
+
+                        {/* Nutrient Breakdown */}
+                        {healthData.mealLogs.length > 0 && (
+                            <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                                <div className="text-center">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Protein</p>
+                                    <p className="font-semibold text-sm">{totalNutrients.protein.toFixed(1)}g</p>
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Carbs</p>
+                                    <p className="font-semibold text-sm">{totalNutrients.carbs.toFixed(1)}g</p>
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Fat</p>
+                                    <p className="font-semibold text-sm">{totalNutrients.fat.toFixed(1)}g</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Meal History */}
+                        {healthData.mealLogs.length > 0 && (
+                            <div className="space-y-2 mt-3">
+                                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">Today's Meals</p>
+                                {healthData.mealLogs.map((meal) => (
+                                    <div key={meal.id} className="flex items-start justify-between text-sm bg-gray-50 dark:bg-gray-900 p-2 rounded-lg">
+                                        <div className="flex-1">
+                                            <p className="font-medium">{meal.food.name}</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                {meal.grams}g • {meal.nutrients.calories} cal • P:{meal.nutrients.protein.toFixed(1)}g C:{meal.nutrients.carbs.toFixed(1)}g F:{meal.nutrients.fat.toFixed(1)}g
+                                            </p>
+                                            <p className="text-xs text-gray-400">{meal.time}</p>
+                                        </div>
+                                        <button
+                                            onClick={() => deleteMealLog(meal.id)}
+                                            className="text-red-500 hover:text-red-700 ml-2"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Mood Tracker */}
@@ -562,8 +721,8 @@ const Health = () => {
                                     key={index}
                                     onClick={() => setHealthData(prev => ({ ...prev, mood: index + 1 }))}
                                     className={`flex-1 py-3 rounded-xl text-2xl transition ${healthData.mood === index + 1
-                                            ? 'bg-blue-500 scale-110'
-                                            : 'bg-gray-100 dark:bg-gray-700 hover:scale-105'
+                                        ? 'bg-blue-500 scale-110'
+                                        : 'bg-gray-100 dark:bg-gray-700 hover:scale-105'
                                         }`}
                                 >
                                     {emoji}
@@ -581,6 +740,113 @@ const Health = () => {
                     Edit Health Profile
                 </button>
             </div>
+
+            {/* Nutrition Modal */}
+            {showNutritionModal && (
+                <ModalWrapper
+                    isOpen={showNutritionModal}
+                    onClose={() => {
+                        setShowNutritionModal(false);
+                        setSelectedFood(null);
+                        setFoodSearch('');
+                    }}
+                    title="Add Food"
+                >
+                    <div className="space-y-4">
+                        {/* Search */}
+                        <div className="relative">
+                            <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                            <input
+                                type="text"
+                                value={foodSearch}
+                                onChange={(e) => setFoodSearch(e.target.value)}
+                                placeholder="Search food (e.g., chicken, rice, apple)"
+                                className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-orange-500"
+                            />
+                        </div>
+
+                        {/* Search Results */}
+                        {searchResults.length > 0 && !selectedFood && (
+                            <div className="max-h-60 overflow-y-auto space-y-2">
+                                {searchResults.map((food, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => {
+                                            setSelectedFood(food);
+                                            setFoodSearch('');
+                                        }}
+                                        className="w-full text-left p-3 bg-gray-50 dark:bg-gray-900 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                                    >
+                                        <p className="font-medium">{food.name}</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                            {food.category} • {food.calories} cal/100g
+                                        </p>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Selected Food */}
+                        {selectedFood && (
+                            <div className="space-y-4">
+                                <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-xl">
+                                    <p className="font-semibold">{selectedFood.name}</p>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">{selected Food.category}</p>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">Amount (grams)</label>
+                                    <input
+                                        type="number"
+                                        value={foodGrams}
+                                        onChange={(e) => setFoodGrams(e.target.value)}
+                                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-orange-500"
+                                    />
+                                </div>
+
+                                {/* Nutrient Preview */}
+                                {foodGrams && (
+                                    <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                                        <p className="text-sm font-semibold mb-2">Nutritional Information</p>
+                                        {(() => {
+                                            const nutrients = calculateNutrients(selectedFood, parseFloat(foodGrams));
+                                            return (
+                                                <div className="grid grid-cols-2 gap-2 text-sm">
+                                                    <div>Calories: <span className="font-semibold">{nutrients.calories}</span></div>
+                                                    <div>Protein: <span className="font-semibold">{nutrients.protein.toFixed(1)}g</span></div>
+                                                    <div>Carbs: <span className="font-semibold">{nutrients.carbs.toFixed(1)}g</span></div>
+                                                    <div>Fat: <span className="font-semibold">{nutrients.fat.toFixed(1)}g</span></div>
+                                                    <div>Fiber: <span className="font-semibold">{nutrients.fiber.toFixed(1)}g</span></div>
+                                                    <div>Sugar: <span className="font-semibold">{nutrients.sugar.toFixed(1)}g</span></div>
+                                                </div>
+                                            );
+                                        })()}
+                                    </div>
+                                )}
+
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => {
+                                            setSelectedFood(null);
+                                            setFoodGrams('100');
+                                        }}
+                                        className="flex-1 px-6 py-3 bg-gray-200 dark:bg-gray-700 rounded-2xl font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+                                    >
+                                        Change Food
+                                    </button>
+                                    <button
+                                        onClick={addMeal}
+                                        disabled={!foodGrams}
+                                        className="flex-1 px-6 py-3 bg-orange-500 text-white rounded-2xl font-medium hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+                                    >
+                                        Add Meal
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </ModalWrapper>
+            )}
         </div>
     );
 };
