@@ -263,9 +263,9 @@ const Health = () => {
     };
 
     // Calculate totals
-    const totalWater = healthData.waterLogs.reduce((sum, log) => sum + log.amount, 0);
-    const totalExercise = healthData.exerciseLogs.reduce((sum, log) => sum + log.minutes, 0);
-    const totalNutrients = healthData.mealLogs.reduce((totals, meal) => ({
+    const totalWater = (healthData.waterLogs || []).reduce((sum, log) => sum + log.amount, 0);
+    const totalExercise = (healthData.exerciseLogs || []).reduce((sum, log) => sum + log.minutes, 0);
+    const totalNutrients = (healthData.mealLogs || []).reduce((totals, meal) => ({
         calories: totals.calories + meal.nutrients.calories,
         protein: totals.protein + meal.nutrients.protein,
         carbs: totals.carbs + meal.nutrients.carbs,
