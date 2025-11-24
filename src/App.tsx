@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import Finance from './pages/Finance';
 import Tasks from './pages/Tasks';
 import Notes from './pages/Notes';
+import Health from './pages/Health';
 import Profile from './pages/Profile';
 import BottomNav from './components/BottomNav';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -26,6 +27,7 @@ function App() {
                     <Route path="/finance" element={<Finance />} />
                     <Route path="/tasks" element={<Tasks />} />
                     <Route path="/notes" element={<Notes />} />
+                    <Route path="/health" element={<Health />} />
                     <Route path="/profile" element={<Profile />} />
                   </Routes>
                   <BottomNav />

@@ -1,4 +1,4 @@
-import { Home, Wallet, CheckSquare, FileText } from 'lucide-react';
+import { Home, Wallet, CheckSquare, FileText, Activity } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
 const BottomNav = () => {
@@ -7,6 +7,7 @@ const BottomNav = () => {
         { path: '/finance', icon: Wallet, label: 'Finance' },
         { path: '/tasks', icon: CheckSquare, label: 'Tasks' },
         { path: '/notes', icon: FileText, label: 'Notes' },
+        { path: '/health', icon: Activity, label: 'Health' },
     ];
 
     return (
