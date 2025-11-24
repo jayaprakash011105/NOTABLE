@@ -97,7 +97,7 @@ const Calendar: React.FC = () => {
       </div>
 
       {/* Calendar Grid */}
-      <div className="grid grid-cols-7 gap-0.5">
+      <div className="grid grid-cols-7 gap-1 md:gap-2">
         {/* Day headers */}
         {daysOfWeek.map((day) => (
           <div
@@ -114,14 +114,14 @@ const Calendar: React.FC = () => {
             key={index}
             onClick={() => day && handleDateClick(day)}
             className={`
-              aspect-square flex items-center justify-center text-[10px] font-medium rounded-full transition max-w-[28px] max-h-[28px] mx-auto
+              w-6 h-6 flex items-center justify-center text-[10px] font-medium rounded-full transition mx-auto
               ${day ? 'cursor-pointer' : 'cursor-default'}
               ${day && isSelected(day)
-                ? 'bg-black dark:bg-white text-white dark:text-black scale-105'
+                ? 'bg-black dark:bg-white text-white dark:text-black scale-110'
                 : day && isToday(day)
-                  ? 'bg-gray-200 dark:bg-gray-700 ring-2 ring-black dark:ring-white'
+                  ? 'bg-gray-200 dark:bg-gray-700 ring-1 ring-black dark:ring-white'
                   : day
-                    ? 'hover:bg-gray-100 dark:hover:bg-gray-700 hover:scale-105'
+                    ? 'hover:bg-gray-100 dark:hover:bg-gray-700 hover:scale-110'
                     : ''
               }
             `}
