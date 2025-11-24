@@ -71,8 +71,13 @@ const Health = () => {
 
     const [showOnboarding, setShowOnboarding] = useState(!healthProfile.setupComplete);
     const [showNutritionModal, setShowNutritionModal] = useState(false);
+    const [showExerciseModal, setShowExerciseModal] = useState(false);
     const [showWaterEdit, setShowWaterEdit] = useState(false);
     const [showExerciseEdit, setShowExerciseEdit] = useState(false);
+
+    // Exercise modal state
+    const [exerciseType, setExerciseType] = useState('');
+    const [exerciseMinutes, setExerciseMinutes] = useState('');
 
     // Nutrition modal state
     const [foodSearch, setFoodSearch] = useState('');
@@ -223,21 +228,24 @@ const Health = () => {
     };
 
     // Exercise functions
-    const addExercise = () => {
-        const type = prompt('Exercise type (e.g., Running, Gym, Yoga):');
-        const minutes = prompt('Duration in minutes:');
-        if (type && minutes) {
-            const newLog: ExerciseLog = {
-                id: Date.now().toString(),
-                type,
-                minutes: parseInt(minutes),
-                time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
-            };
-            setHealthData(prev => ({
-                ...prev,
-                exerciseLogs: [...prev.exerciseLogs, newLog]
-            }));
-        }
+    const handleExerciseSubmit = () => {
+        if (!exerciseType || !exerciseMinutes) return;
+
+        const newLog: ExerciseLog = {
+            id: Date.now().toString(),
+            type: exerciseType,
+            minutes: parseInt(exerciseMinutes),
+            time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+        };
+        setHealthData(prev => ({
+            ...prev,
+            exerciseLogs: [...prev.exerciseLogs, newLog]
+        }));
+
+        // Reset modal state
+        setExerciseType('');
+        setExerciseMinutes('');
+        setShowExerciseModal(false);
     };
 
     const deleteExerciseLog = (id: string) => {
@@ -587,7 +595,7 @@ const Health = () => {
                                     <Edit2 className="w-4 h-4" />
                                 </button>
                                 <button
-                                    onClick={addExercise}
+                                    onClick={() => setShowExerciseModal(true)}
                                     className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center hover:scale-110 transition"
                                 >
                                     <Plus className="w-4 h-4" />
@@ -832,6 +840,74 @@ const Health = () => {
                                 </div>
                             </div>
                         )}
+                    </div>
+                </ModalWrapper>
+            )}
+
+            {/* Exercise Modal */}
+            {showExerciseModal && (
+                <ModalWrapper
+                    isOpen={showExerciseModal}
+                    onClose={() => {
+                        setShowExerciseModal(false);
+                        setExerciseType('');
+                        setExerciseMinutes('');
+                    }}
+                    title="Log Exercise"
+                >
+                    <div className="space-y-4">
+                        {/* Exercise Type */}
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Exercise Type</label>
+                            <input
+                                type="text"
+                                value={exerciseType}
+                                onChange={(e) => setExerciseType(e.target.value)}
+                                placeholder="e.g., Running, Gym, Yoga, Swimming"
+                                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-green-500 focus:outline-none"
+                            />
+                        </div>
+
+                        {/* Duration */}
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Duration (minutes)</label>
+                            <input
+                                type="number"
+                                value={exerciseMinutes}
+                                onChange={(e) => setExerciseMinutes(e.target.value)}
+                                placeholder="30"
+                                min="1"
+                                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-green-500 focus:outline-none"
+                            />
+                        </div>
+
+                        {/* Quick Suggestions */}
+                        <div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Quick Add</p>
+                            <div className="grid grid-cols-2 gap-2">
+                                {['Running', 'Gym', 'Yoga', 'Cycling', 'Swimming', 'Walking'].map((type) => (
+                                    <button
+                                        key={type}
+                                        onClick={() => setExerciseType(type)}
+                                        className={`px-3 py-2 rounded-lg text-sm font-medium transition ${exerciseType === type
+                                                ? 'bg-green-500 text-white'
+                                                : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                            }`}
+                                    >
+                                        {type}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Submit Button */}
+                        <button
+                            onClick={handleExerciseSubmit}
+                            disabled={!exerciseType || !exerciseMinutes}
+                            className="w-full px-6 py-3 bg-green-500 text-white rounded-2xl font-medium hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+                        >
+                            Log Exercise
+                        </button>
                     </div>
                 </ModalWrapper>
             )}
