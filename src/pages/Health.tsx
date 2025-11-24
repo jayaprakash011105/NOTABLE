@@ -472,7 +472,7 @@ const Health = () => {
                                         type="number"
                                         value={formData.height}
                                         onChange={(e) => setFormData({ ...formData, height: e.target.value })}
-                                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-gray-500"
                                         placeholder="170"
                                     />
                                 </div>
@@ -482,7 +482,7 @@ const Health = () => {
                                         type="number"
                                         value={formData.weight}
                                         onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-                                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-gray-500"
                                         placeholder="70"
                                     />
                                 </div>
@@ -492,7 +492,7 @@ const Health = () => {
                                         type="number"
                                         value={formData.age}
                                         onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-                                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-gray-500"
                                         placeholder="25"
                                     />
                                 </div>
@@ -501,7 +501,7 @@ const Health = () => {
                                     <select
                                         value={formData.gender}
                                         onChange={(e) => setFormData({ ...formData, gender: e.target.value as any })}
-                                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-gray-500"
                                     >
                                         <option value="male">Male</option>
                                         <option value="female">Female</option>
@@ -516,7 +516,7 @@ const Health = () => {
                             <select
                                 value={formData.activityLevel}
                                 onChange={(e) => setFormData({ ...formData, activityLevel: e.target.value as any })}
-                                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-gray-500"
                             >
                                 <option value="sedentary">Sedentary (little or no exercise)</option>
                                 <option value="light">Light (exercise 1-3 days/week)</option>
@@ -527,7 +527,7 @@ const Health = () => {
                         </div>
 
                         {formData.height && formData.weight && (
-                            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-4">
+                            <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-4">
                                 <p className="text-sm font-medium mb-1">Your BMI</p>
                                 <p className="text-2xl font-bold">
                                     {calculateBMI(parseFloat(formData.weight), parseFloat(formData.height))}
@@ -541,7 +541,7 @@ const Health = () => {
                         <button
                             onClick={handleOnboardingSubmit}
                             disabled={!formData.height || !formData.weight || !formData.age}
-                            className="w-full py-4 bg-blue-500 text-white rounded-2xl font-semibold hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+                            className="w-full py-4 bg-gray-800 dark:bg-gray-300 text-white rounded-2xl font-semibold hover:bg-gray-900 dark:hover:bg-gray-200 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
                         >
                             Complete Setup
                         </button>
@@ -591,9 +591,9 @@ const Health = () => {
                         {advice.map((item, index) => (
                             <div
                                 key={index}
-                                className={`p-4 rounded-2xl ${item.type === 'success' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200' :
-                                    item.type === 'warning' ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200' :
-                                        'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200'
+                                className={`p-4 rounded-2xl ${item.type === 'success' ? 'bg-gray-100 dark:bg-gray-800/30 text-green-800 dark:text-green-200' :
+                                    item.type === 'warning' ? 'bg-gray-100 dark:bg-gray-800/30 text-orange-800 dark:text-orange-200' :
+                                        'bg-gray-100 dark:bg-gray-800/30 text-blue-800 dark:text-blue-200'
                                     }`}
                             >
                                 <p className="text-sm font-medium">{item.icon} {item.text}</p>
@@ -608,8 +608,8 @@ const Health = () => {
                     <div className="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-sm">
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                                    <Droplet className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                                    <Droplet className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                                 </div>
                                 <div>
                                     <h3 className="font-semibold">Water Intake</h3>
@@ -635,7 +635,7 @@ const Health = () => {
                                 </button>
                                 <button
                                     onClick={addWater}
-                                    className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center hover:scale-110 transition"
+                                    className="w-8 h-8 rounded-full bg-gray-800 dark:bg-gray-300 text-white flex items-center justify-center hover:scale-110 transition"
                                 >
                                     <Plus className="w-4 h-4" />
                                 </button>
@@ -643,7 +643,7 @@ const Health = () => {
                         </div>
                         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-3">
                             <div
-                                className="bg-blue-500 h-2 rounded-full transition-all"
+                                className="bg-gray-800 dark:bg-gray-300 h-2 rounded-full transition-all"
                                 style={{ width: `${Math.min((totalWater / healthData.goals.water) * 100, 100)}%` }}
                             />
                         </div>
@@ -668,8 +668,8 @@ const Health = () => {
                     <div className="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-sm">
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
-                                    <Activity className="w-5 h-5 text-green-600 dark:text-green-400" />
+                                <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                                    <Activity className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                                 </div>
                                 <div>
                                     <h3 className="font-semibold">Exercise</h3>
@@ -687,7 +687,7 @@ const Health = () => {
                                 </button>
                                 <button
                                     onClick={() => setShowExerciseModal(true)}
-                                    className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center hover:scale-110 transition"
+                                    className="w-8 h-8 rounded-full bg-gray-800 dark:bg-gray-300 text-white flex items-center justify-center hover:scale-110 transition"
                                 >
                                     <Plus className="w-4 h-4" />
                                 </button>
@@ -695,7 +695,7 @@ const Health = () => {
                         </div>
                         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-3">
                             <div
-                                className="bg-green-500 h-2 rounded-full transition-all"
+                                className="bg-gray-800 dark:bg-gray-300 h-2 rounded-full transition-all"
                                 style={{ width: `${Math.min((totalExercise / healthData.goals.exercise) * 100, 100)}%` }}
                             />
                         </div>
@@ -720,8 +720,8 @@ const Health = () => {
                     <div className="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-sm">
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900 flex items-center justify-center">
-                                    <Apple className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                                <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                                    <Apple className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                                 </div>
                                 <div>
                                     <h3 className="font-semibold">Nutrition</h3>
@@ -732,14 +732,14 @@ const Health = () => {
                             </div>
                             <button
                                 onClick={() => setShowNutritionModal(true)}
-                                className="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center hover:scale-110 transition"
+                                className="w-8 h-8 rounded-full bg-gray-800 dark:bg-gray-300 text-white flex items-center justify-center hover:scale-110 transition"
                             >
                                 <Plus className="w-4 h-4" />
                             </button>
                         </div>
                         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-3">
                             <div
-                                className="bg-orange-500 h-2 rounded-full transition-all"
+                                className="bg-gray-800 dark:bg-gray-300 h-2 rounded-full transition-all"
                                 style={{ width: `${Math.min((totalNutrients.calories / healthData.goals.calories) * 100, 100)}%` }}
                             />
                         </div>
@@ -791,8 +791,8 @@ const Health = () => {
                     <div className="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-sm">
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center">
-                                    <Heart className="w-5 h-5 text-red-600 dark:text-red-400" />
+                                <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                                    <Heart className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                                 </div>
                                 <div>
                                     <h3 className="font-semibold">Mood</h3>
@@ -808,7 +808,7 @@ const Health = () => {
                                     key={index}
                                     onClick={() => setHealthData(prev => ({ ...prev, mood: index + 1 }))}
                                     className={`flex-1 py-3 rounded-xl text-2xl transition ${healthData.mood === index + 1
-                                        ? 'bg-blue-500 scale-110'
+                                        ? 'bg-gray-800 dark:bg-gray-300 scale-110'
                                         : 'bg-gray-100 dark:bg-gray-700 hover:scale-105'
                                         }`}
                                 >
@@ -876,7 +876,7 @@ const Health = () => {
                         {/* Selected Food */}
                         {selectedFood && (
                             <div className="space-y-4">
-                                <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-xl">
+                                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl">
                                     <p className="font-semibold">{selectedFood.name}</p>
                                     <p className="text-sm text-gray-600 dark:text-gray-400">{selectedFood.category}</p>
                                 </div>
@@ -924,7 +924,7 @@ const Health = () => {
                                     <button
                                         onClick={addMeal}
                                         disabled={!foodGrams}
-                                        className="flex-1 px-6 py-3 bg-orange-500 text-white rounded-2xl font-medium hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+                                        className="flex-1 px-6 py-3 bg-gray-800 dark:bg-gray-300 text-white rounded-2xl font-medium hover:bg-gray-900 dark:hover:bg-gray-200 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
                                     >
                                         Add Meal
                                     </button>
@@ -955,7 +955,7 @@ const Health = () => {
                                 value={exerciseType}
                                 onChange={(e) => setExerciseType(e.target.value)}
                                 placeholder="e.g., Running, Gym, Yoga, Swimming"
-                                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-green-500 focus:outline-none"
+                                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-gray-500 focus:outline-none"
                             />
                         </div>
 
@@ -968,7 +968,7 @@ const Health = () => {
                                 onChange={(e) => setExerciseMinutes(e.target.value)}
                                 placeholder="30"
                                 min="1"
-                                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-green-500 focus:outline-none"
+                                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-gray-500 focus:outline-none"
                             />
                         </div>
 
@@ -981,7 +981,7 @@ const Health = () => {
                                         key={type}
                                         onClick={() => setExerciseType(type)}
                                         className={`px-3 py-2 rounded-lg text-sm font-medium transition ${exerciseType === type
-                                            ? 'bg-green-500 text-white'
+                                            ? 'bg-gray-800 dark:bg-gray-300 text-white'
                                             : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
                                             }`}
                                     >
@@ -995,7 +995,7 @@ const Health = () => {
                         <button
                             onClick={handleExerciseSubmit}
                             disabled={!exerciseType || !exerciseMinutes}
-                            className="w-full px-6 py-3 bg-green-500 text-white rounded-2xl font-medium hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+                            className="w-full px-6 py-3 bg-gray-800 dark:bg-gray-300 text-white rounded-2xl font-medium hover:bg-gray-900 dark:hover:bg-gray-200 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
                         >
                             Log Exercise
                         </button>
