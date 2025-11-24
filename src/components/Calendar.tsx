@@ -102,7 +102,7 @@ const Calendar: React.FC = () => {
         {daysOfWeek.map((day) => (
           <div
             key={day}
-            className="text-center text-[9px] font-medium text-gray-500 dark:text-gray-400"
+            className="text-center text-[9px] font-medium text-gray-500 dark:text-gray-400 pb-0.5"
           >
             {day}
           </div>
@@ -114,7 +114,7 @@ const Calendar: React.FC = () => {
             key={index}
             onClick={() => day && handleDateClick(day)}
             className={`
-              aspect-square flex items-center justify-center text-[11px] md:text-xs font-medium rounded-full transition
+              aspect-square flex items-center justify-center text-[10px] font-medium rounded-full transition max-w-[28px] max-h-[28px] mx-auto
               ${day ? 'cursor-pointer' : 'cursor-default'}
               ${day && isSelected(day)
                 ? 'bg-black dark:bg-white text-white dark:text-black scale-105'
