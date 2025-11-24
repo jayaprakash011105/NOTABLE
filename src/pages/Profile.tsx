@@ -159,7 +159,7 @@ const Profile = () => {
                                         onClick={item.action}
                                         className="w-full flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0"
                                     >
-                                        <item.icon className={`w-6 h-6 ${item.iconColor || 'text-gray-700 dark:text-gray-300'}`} />
+                                        <item.icon className={`w-5 h-5 ${item.iconColor || 'text-gray-700 dark:text-gray-300'}`} />
                                         <span className="flex-1 text-left font-medium text-gray-900 dark:text-gray-100">
                                             {item.label}
                                         </span>
