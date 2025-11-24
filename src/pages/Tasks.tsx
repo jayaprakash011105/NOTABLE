@@ -115,7 +115,6 @@ const Tasks = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-black pb-32">
             <div className="max-w-md mx-auto">
-                {/* Card Container */}
                 <div className="bg-white dark:bg-gray-800 rounded-[3rem] shadow-2xl m-4 p-8 min-h-[calc(100vh-8rem)]">
                     {/* Header */}
                     <div className="flex items-start justify-between mb-8">
@@ -144,12 +143,8 @@ const Tasks = () => {
                                     }`}
                             >
                                 <div className="flex flex-col items-center">
-                                    <span className={`text-lg font-medium mb-1`}>
-                                        {day.number}
-                                    </span>
-                                    <span className="text-xs">
-                                        {day.name}
-                                    </span>
+                                    <span className="text-lg font-medium mb-1">{day.number}</span>
+                                    <span className="text-xs">{day.name}</span>
                                     {day.date.toDateString() === selectedDateString && (
                                         <div className="w-1.5 h-1.5 bg-white rounded-full mt-2"></div>
                                     )}
@@ -171,14 +166,11 @@ const Tasks = () => {
                         </div>
                     ) : (
                         <div className="relative pl-2">
-                            {/* Timeline Line */}
                             <div className="absolute left-[23px] top-6 bottom-0 w-[2px] bg-gray-200 dark:bg-gray-700"></div>
 
-                            {/* Tasks */}
                             <div className="space-y-8">
                                 {todayTasks.map((task, index) => (
                                     <div key={task.id} className="relative flex gap-5">
-                                        {/* Timeline Dot */}
                                         <button
                                             onClick={() => handleToggleTask(task.id)}
                                             className={`relative z-10 flex-shrink-0 w-12 h-12 rounded-full border-4 border-white dark:border-gray-800 flex items-center justify-center transition-all hover:scale-110 ${task.completed
@@ -193,91 +185,83 @@ const Tasks = () => {
                                             )}
                                         </button>
 
-                                        {/* Task Content */}
                                         <div className="flex-1">
                                             {index === 0 ? (
-                                                /* Featured Task */}
-                                            <div className="relative bg-gradient-to-br from-gray-800 to-gray-900 dark:from-gray-900 dark:to-black rounded-[2rem] p-7 text-white overflow-hidden shadow-2xl">
-                                                {/* Wave Pattern */}
-                                                <div className="absolute inset-0 opacity-[0.03]">
-                                                    <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                                        <path d="M0,30 Q20,25 40,30 T80,30 Q90,30 100,35 L100,100 L0,100 Z" fill="white" />
-                                                        <path d="M0,45 Q20,40 40,45 T80,45 Q90,45 100,50 L100,100 L0,100 Z" fill="white" />
-                                                        <path d="M0,60 Q20,55 40,60 T80,60 Q90,60 100,65 L100,100 L0,100 Z" fill="white" />
-                                                        <path d="M0,75 Q20,70 40,75 T80,75 Q90,75 100,80 L100,100 L0,100 Z" fill="white" />
-                                                    </svg>
-                                                </div>
+                                                <div className="relative bg-gradient-to-br from-gray-800 to-gray-900 dark:from-gray-900 dark:to-black rounded-[2rem] p-7 text-white overflow-hidden shadow-2xl">
+                                                    <div className="absolute inset-0 opacity-[0.03]">
+                                                        <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                                            <path d="M0,30 Q20,25 40,30 T80,30 Q90,30 100,35 L100,100 L0,100 Z" fill="white" />
+                                                            <path d="M0,45 Q20,40 40,45 T80,45 Q90,45 100,50 L100,100 L0,100 Z" fill="white" />
+                                                            <path d="M0,60 Q20,55 40,60 T80,60 Q90,60 100,65 L100,100 L0,100 Z" fill="white" />
+                                                            <path d="M0,75 Q20,70 40,75 T80,75 Q90,75 100,80 L100,100 L0,100 Z" fill="white" />
+                                                        </svg>
+                                                    </div>
 
-                                                <div className="relative">
-                                                    <div className="flex items-start justify-between mb-4">
-                                                        <div>
-                                                            <h3 className="text-2xl font-bold mb-2">{task.title}</h3>
+                                                    <div className="relative">
+                                                        <div className="flex items-start justify-between mb-4">
+                                                            <div>
+                                                                <h3 className="text-2xl font-bold mb-2">{task.title}</h3>
+                                                                {task.description && (
+                                                                    <p className="text-gray-300 text-sm leading-relaxed">
+                                                                        {task.description}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                            {task.time && (
+                                                                <span className="text-gray-400 text-sm font-medium ml-4">
+                                                                    {task.time}
+                                                                </span>
+                                                            )}
+                                                        </div>
+
+                                                        <div className="flex items-center justify-between mt-6">
+                                                            <div className="flex -space-x-4">
+                                                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 border-3 border-gray-800 flex items-center justify-center text-lg shadow-lg">
+                                                                    👤
+                                                                </div>
+                                                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-blue-500 border-3 border-gray-800 flex items-center justify-center text-lg shadow-lg">
+                                                                    👤
+                                                                </div>
+                                                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 to-red-500 border-3 border-gray-800 flex items-center justify-center text-lg shadow-lg">
+                                                                    👤
+                                                                </div>
+                                                            </div>
+
+                                                            <button
+                                                                onClick={() => handleToggleTask(task.id)}
+                                                                className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all shadow-lg ${task.completed ? 'bg-green-500' : 'bg-white hover:scale-105'
+                                                                    }`}
+                                                            >
+                                                                {task.completed && (
+                                                                    <Check className="w-6 h-6 text-white font-bold" />
+                                                                )}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div onClick={() => handleToggleTask(task.id)} className="cursor-pointer group">
+                                                    <div className="flex items-start justify-between">
+                                                        <div className="flex-1">
+                                                            <h3 className={`text-xl font-semibold mb-1 transition-all ${task.completed
+                                                                    ? 'line-through text-gray-400'
+                                                                    : 'text-gray-900 dark:text-white group-hover:text-gray-600 dark:group-hover:text-gray-300'
+                                                                }`}>
+                                                                {task.title}
+                                                            </h3>
                                                             {task.description && (
-                                                                <p className="text-gray-300 text-sm leading-relaxed">
+                                                                <p className="text-gray-400 text-sm leading-relaxed">
                                                                     {task.description}
                                                                 </p>
                                                             )}
                                                         </div>
                                                         {task.time && (
-                                                            <span className="text-gray-400 text-sm font-medium ml-4">
+                                                            <span className="text-gray-400 text-sm ml-4">
                                                                 {task.time}
                                                             </span>
                                                         )}
                                                     </div>
-
-                                                    <div className="flex items-center justify-between mt-6">
-                                                        {/* Avatars */}
-                                                        <div className="flex -space-x-4">
-                                                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 border-3 border-gray-800 flex items-center justify-center text-lg shadow-lg">
-                                                                👤
-                                                            </div>
-                                                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-blue-500 border-3 border-gray-800 flex items-center justify-center text-lg shadow-lg">
-                                                                👤
-                                                            </div>
-                                                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 to-red-500 border-3 border-gray-800 flex items-center justify-center text-lg shadow-lg">
-                                                                👤
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Complete Checkbox */}
-                                                        <button
-                                                            onClick={() => handleToggleTask(task.id)}
-                                                            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all shadow-lg ${task.completed
-                                                                    ? 'bg-green-500'
-                                                                    : 'bg-white hover:scale-105'
-                                                                }`}
-                                                        >
-                                                            {task.completed && (
-                                                                <Check className="w-6 h-6 text-white font-bold" />
-                                                            )}
-                                                        </button>
-                                                    </div>
                                                 </div>
-                                            </div>
-                                            ) : (
-                                                /* Regular Task */}
-                                            <div onClick={() => handleToggleTask(task.id)} className="cursor-pointer group">
-                                                <div className="flex items-start justify-between">
-                                                    <div className="flex-1">
-                                                        <h3 className={`text-xl font-semibold mb-1 transition-all ${task.completed
-                                                                ? 'line-through text-gray-400'
-                                                                : 'text-gray-900 dark:text-white group-hover:text-gray-600 dark:group-hover:text-gray-300'
-                                                            }`}>
-                                                            {task.title}
-                                                        </h3>
-                                                        {task.description && (
-                                                            <p className="text-gray-400 text-sm leading-relaxed">
-                                                                {task.description}
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                    {task.time && (
-                                                        <span className="text-gray-400 text-sm ml-4">
-                                                            {task.time}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
                                             )}
                                         </div>
                                     </div>
