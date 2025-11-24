@@ -130,12 +130,26 @@ const Health = () => {
 
     const [healthData, setHealthData] = useState<HealthData>(() => {
         const saved = localStorage.getItem(`health_${today}`);
-        if (saved) return JSON.parse(saved);
         const goals = healthProfile.setupComplete ? calculatePersonalizedGoals(healthProfile) : {
             water: 8,
             calories: 2000,
             exercise: 60,
         };
+
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            // Ensure all required fields exist with defaults
+            return {
+                date: parsed.date || today,
+                waterLogs: parsed.waterLogs || [],
+                exerciseLogs: parsed.exerciseLogs || [],
+                mealLogs: parsed.mealLogs || [],
+                sleep: parsed.sleep || { hours: 0, quality: 0, goal: 8 },
+                mood: parsed.mood || 0,
+                goals: parsed.goals || goals
+            };
+        }
+
         return {
             date: today,
             waterLogs: [],
@@ -275,12 +289,16 @@ const Health = () => {
     }), { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0 });
 
     const calculateHealthScore = () => {
-        const waterScore = Math.min((totalWater / healthData.goals.water) * 20, 20);
-        const exerciseScore = Math.min((totalExercise / healthData.goals.exercise) * 25, 25);
-        const sleepScore = healthData.sleep.hours > 0 ? Math.min((healthData.sleep.hours / healthData.sleep.goal) * 25, 25) : 0;
+        const goals = healthData.goals || { water: 8, exercise: 60, calories: 2000 };
+        const sleep = healthData.sleep || { hours: 0, quality: 0, goal: 8 };
+        const mood = healthData.mood || 0;
+
+        const waterScore = Math.min((totalWater / goals.water) * 20, 20);
+        const exerciseScore = Math.min((totalExercise / goals.exercise) * 25, 25);
+        const sleepScore = sleep.hours > 0 ? Math.min((sleep.hours / sleep.goal) * 25, 25) : 0;
         const nutritionScore = totalNutrients.calories > 0 ?
-            Math.min((1 - Math.abs(totalNutrients.calories - healthData.goals.calories) / healthData.goals.calories) * 20, 20) : 0;
-        const moodScore = (healthData.mood / 5) * 10;
+            Math.min((1 - Math.abs(totalNutrients.calories - goals.calories) / goals.calories) * 20, 20) : 0;
+        const moodScore = (mood / 5) * 10;
         return Math.round(waterScore + exerciseScore + sleepScore + nutritionScore + moodScore);
     };
 
@@ -297,20 +315,23 @@ const Health = () => {
             }
         }
 
-        if (totalWater < healthData.goals.water * 0.5) {
-            advice.push({ icon: '💧', text: `You're ${Math.round((1 - totalWater / healthData.goals.water) * 100)}% below your water goal. Drink ${healthData.goals.water - totalWater} more glasses!`, type: 'warning' });
-        } else if (totalWater >= healthData.goals.water) {
+        const goals = healthData.goals || { water: 8, exercise: 60, calories: 2000 };
+        const mealLogs = healthData.mealLogs || [];
+
+        if (totalWater < goals.water * 0.5) {
+            advice.push({ icon: '💧', text: `You're ${Math.round((1 - totalWater / goals.water) * 100)}% below your water goal. Drink ${goals.water - totalWater} more glasses!`, type: 'warning' });
+        } else if (totalWater >= goals.water) {
             advice.push({ icon: '💧', text: 'Excellent hydration! You\'ve met your personalized water goal! 💧', type: 'success' });
         }
 
         if (totalExercise === 0) {
             const suggestion = healthProfile.activityLevel === 'sedentary' ? '15-minute walk' : '30-minute workout';
             advice.push({ icon: '🏃', text: `No exercise logged today. Try a ${suggestion}!`, type: 'warning' });
-        } else if (totalExercise >= healthData.goals.exercise) {
+        } else if (totalExercise >= goals.exercise) {
             advice.push({ icon: '🏃', text: 'Amazing! You\'ve hit your personalized exercise goal! 🎉', type: 'success' });
         }
 
-        if (totalNutrients.protein < 50 && healthData.mealLogs.length > 0) {
+        if (totalNutrients.protein < 50 && mealLogs.length > 0) {
             advice.push({ icon: '🥩', text: `Low protein intake (${totalNutrients.protein.toFixed(1)}g). Add protein-rich foods like chicken, eggs, or lentils.`, type: 'warning' });
         }
 
@@ -321,6 +342,14 @@ const Health = () => {
     const advice = getPersonalizedAdvice();
     const bmi = healthProfile.setupComplete ? parseFloat(calculateBMI(healthProfile.weight, healthProfile.height)) : 0;
     const bmiInfo = healthProfile.setupComplete ? getBMICategory(bmi) : null;
+
+    // Safety variables for JSX
+    const safeGoals = healthData.goals || { water: 8, exercise: 60, calories: 2000 };
+    const safeSleep = healthData.sleep || { hours: 0, quality: 0, goal: 8 };
+    const safeMood = healthData.mood || 0;
+    const safeWaterLogs = healthData.waterLogs || [];
+    const safeExerciseLogs = healthData.exerciseLogs || [];
+    const safeMealLogs = healthData.mealLogs || [];
 
     // Onboarding Screen
     if (showOnboarding) {
