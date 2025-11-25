@@ -51,6 +51,24 @@ const Profile = () => {
         return saved ? JSON.parse(saved) : true;
     });
 
+    // Todo Preferences
+    const [showTodoPreferences, setShowTodoPreferences] = useState(false);
+    const [defaultView, setDefaultView] = useState(() => {
+        const saved = localStorage.getItem('defaultView');
+        return saved || 'all';
+    });
+    const [sortBy, setSortBy] = useState(() => {
+        const saved = localStorage.getItem('sortBy');
+        return saved || 'date';
+    });
+    const [autoDeleteCompleted, setAutoDeleteCompleted] = useState(() => {
+        const saved = localStorage.getItem('autoDeleteCompleted');
+        return saved ? JSON.parse(saved) : false;
+    });
+
+    // Advanced Settings
+    const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
+
     const handleSaveProfile = () => {
         setUserName(editName);
         setUserEmail(editEmail);
@@ -72,6 +90,41 @@ const Profile = () => {
         setShowLogoutConfirm(false);
     };
 
+    const handleSaveTodoPreferences = () => {
+        localStorage.setItem('defaultView', defaultView);
+        localStorage.setItem('sortBy', sortBy);
+        localStorage.setItem('autoDeleteCompleted', JSON.stringify(autoDeleteCompleted));
+        setShowTodoPreferences(false);
+    };
+
+    const handleExportData = () => {
+        const data = {
+            transactions: localStorage.getItem('transactions'),
+            budgetCategories: localStorage.getItem('budgetCategories'),
+            quickTasks: localStorage.getItem('quickTasks'),
+            healthData: localStorage.getItem('healthData'),
+            userName: localStorage.getItem('userName'),
+            userEmail: localStorage.getItem('userEmail'),
+        };
+        const dataStr = JSON.stringify(data, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `notable-backup-${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+        alert('Data exported successfully!');
+    };
+
+    const handleClearAllData = () => {
+        if (confirm('Are you sure you want to clear ALL app data? This action cannot be undone!')) {
+            localStorage.clear();
+            alert('All data cleared! Refreshing app...');
+            window.location.reload();
+        }
+    };
+
     const menuSections = [
         {
             title: 'Account',
@@ -83,7 +136,7 @@ const Profile = () => {
             title: 'Preferences',
             items: [
                 { icon: Settings, label: 'App Settings', action: () => setShowAppSettings(true) } as MenuItem,
-                { icon: FileText, label: 'Todo Preferences', action: () => console.log('Todo Preferences') } as MenuItem,
+                { icon: FileText, label: 'Todo Preferences', action: () => setShowTodoPreferences(true) } as MenuItem,
             ]
         },
         {
@@ -96,7 +149,7 @@ const Profile = () => {
         {
             title: 'Advanced',
             items: [
-                { icon: Settings, label: 'Advanced Settings', action: () => console.log('Advanced Settings') } as MenuItem,
+                { icon: Settings, label: 'Advanced Settings', action: () => setShowAdvancedSettings(true) } as MenuItem,
                 { icon: LogOut, label: 'Logout', action: () => setShowLogoutConfirm(true), iconColor: 'text-red-500', bgColor: 'bg-red-100 dark:bg-red-900' } as MenuItem,
             ]
         }
@@ -330,22 +383,170 @@ const Profile = () => {
                         >
                             Save Settings
                         </button>
-                    </div>
+                        Save Settings
+                    </button>
+                </div>
                 </ModalWrapper>
-            )}
+    )
+}
 
-            {/* Logout Confirmation Dialog */}
-            <ConfirmDialog
-                isOpen={showLogoutConfirm}
-                onClose={() => setShowLogoutConfirm(false)}
-                onConfirm={handleLogout}
-                title="Logout"
-                message="Are you sure you want to logout?"
-                confirmText="Logout"
-                cancelText="Cancel"
-                variant="danger"
-            />
-        </div>
+{/* Logout Confirmation Dialog */ }
+{
+    showLogoutConfirm && (
+        <ConfirmDialog
+            isOpen={showLogoutConfirm}
+            onClose={() => setShowLogoutConfirm(false)}
+            title="Logout"
+            message="Are you sure you want to logout?"
+            onConfirm={handleLogout}
+        />
+    )
+}
+
+{/* Todo Preferences Modal */ }
+{
+    showTodoPreferences && (
+        <ModalWrapper
+            isOpen={showTodoPreferences}
+            onClose={() => setShowTodoPreferences(false)}
+            title="Todo Preferences"
+        >
+            <div className="space-y-6">
+                {/* Default View */}
+                <div>
+                    <label className="block text-sm font-medium mb-2">Default View</label>
+                    <select
+                        value={defaultView}
+                        onChange={(e) => setDefaultView(e.target.value)}
+                        className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-xl border-none outline-none"
+                    >
+                        <option value="all">All Tasks</option>
+                        <option value="today">Today's Tasks</option>
+                        <option value="upcoming">Upcoming Tasks</option>
+                        <option value="completed">Completed Tasks</option>
+                    </select>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Choose which tasks to show by default</p>
+                </div>
+
+                {/* Sort By */}
+                <div>
+                    <label className="block text-sm font-medium mb-2">Sort Tasks By</label>
+                    <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                        className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-xl border-none outline-none"
+                    >
+                        <option value="date">Date Created</option>
+                        <option value="priority">Priority</option>
+                        <option value="category">Category</option>
+                        <option value="alphabetical">Alphabetical</option>
+                    </select>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Default sorting order for tasks</p>
+                </div>
+
+                {/* Auto-Delete Completed */}
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                    <div>
+                        <p className="font-medium text-sm">Auto-Delete Completed Tasks</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Remove tasks after 30 days</p>
+                    </div>
+                    <button
+                        onClick={() => setAutoDeleteCompleted(!autoDeleteCompleted)}
+                        className={`relative w-12 h-7 rounded-full transition-colors duration-300 ${autoDeleteCompleted ? 'bg-black dark:bg-white' : 'bg-gray-300 dark:bg-gray-600'
+                            }`}
+                    >
+                        <div
+                            className={`absolute top-1 left-1 w-5 h-5 rounded-full ${autoDeleteCompleted ? 'bg-white dark:bg-black' : 'bg-white'
+                                } shadow-md transition-transform duration-300 ${autoDeleteCompleted ? 'translate-x-5' : 'translate-x-0'
+                                }`}
+                        />
+                    </button>
+                </div>
+
+                <button
+                    onClick={handleSaveTodoPreferences}
+                    className="w-full px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-medium hover:scale-105 transition"
+                >
+                    Save Preferences
+                </button>
+            </div>
+        </ModalWrapper>
+    )
+}
+
+{/* Advanced Settings Modal */ }
+{
+    showAdvancedSettings && (
+        <ModalWrapper
+            isOpen={showAdvancedSettings}
+            onClose={() => setShowAdvancedSettings(false)}
+            title="Advanced Settings"
+        >
+            <div className="space-y-4">
+                {/* Export Data */}
+                <button
+                    onClick={handleExportData}
+                    className="w-full p-4 bg-gray-50 dark:bg-gray-900 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition text-left"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-black dark:bg-white rounded-full flex items-center justify-center">
+                            <svg className="w-5 h-5 text-white dark:text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p className="font-medium">Export All Data</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Download backup as JSON</p>
+                        </div>
+                    </div>
+                </button>
+
+                {/* Import Data */}
+                <label className="w-full block">
+                    <div className="w-full p-4 bg-gray-50 dark:bg-gray-900 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-black dark:bg-white rounded-full flex items-center justify-center">
+                                <svg className="w-5 h-5 text-white dark:text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="font-medium">Import Data</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">Restore from backup file</p>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="file" accept=".json" className="hidden" />
+                </label>
+
+                {/* Clear All Data */}
+                <button
+                    onClick={handleClearAllData}
+                    className="w-full p-4 bg-red-50 dark:bg-red-900/20 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition text-left"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center">
+                            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p className="font-medium text-red-500">Clear All Data</p>
+                            <p className="text-xs text-red-400">⚠️ This action cannot be undone</p>
+                        </div>
+                    </div>
+                </button>
+
+                <div className="bg-gray-100 dark:bg-gray-900 rounded-xl p-4">
+                    <p className="text-xs text-gray-600 dark:text-gray-400 text-center">
+                        💡 Tip: Export your data regularly to keep a backup
+                    </p>
+                </div>
+            </div>
+        </ModalWrapper>
+    )
+}
+        </div >
     );
 };
 
