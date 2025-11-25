@@ -1,5 +1,5 @@
 // Notification Context for real-time updates
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 
 interface Notification {
     id: string;
