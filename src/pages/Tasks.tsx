@@ -274,10 +274,26 @@ const Tasks = () => {
                                             /* Regular Task - Enhanced Design */
                                             <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all border border-gray-100 dark:border-gray-800">
                                                 <div className="flex items-start justify-between mb-3">
+                                                    {/* Checkbox Circle */}
+                                                    <button
+                                                        onClick={() => handleToggleTask(task.id)}
+                                                        className="flex-shrink-0 mr-3 mt-1"
+                                                    >
+                                                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition ${task.completed
+                                                                ? 'bg-black dark:bg-white border-black dark:border-white'
+                                                                : 'border-gray-300 dark:border-gray-600 hover:border-black dark:hover:border-white'
+                                                            }`}>
+                                                            {task.completed && (
+                                                                <svg className="w-4 h-4 text-white dark:text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                                                </svg>
+                                                            )}
+                                                        </div>
+                                                    </button>
+
                                                     <div className="flex-1">
                                                         <h3
-                                                            onClick={() => handleToggleTask(task.id)}
-                                                            className={`font-semibold text-lg cursor-pointer mb-2 ${task.completed ? 'line-through text-gray-400' : ''}`}
+                                                            className={`font-semibold text-lg mb-2 ${task.completed ? 'line-through text-gray-400' : ''}`}
                                                         >
                                                             {task.title}
                                                         </h3>

@@ -38,7 +38,7 @@ const SavingsGoalForm: React.FC<SavingsGoalFormProps> = ({ currentGoal, onSave, 
 
             <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-4">
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Your Target</p>
-                <p className="text-2xl font-bold">${parseFloat(goal || '0').toLocaleString()}</p>
+                <p className="text-2xl font-bold">{parseFloat(goal || '0').toLocaleString()}</p>
             </div>
 
             <div className="flex gap-3 pt-4">
