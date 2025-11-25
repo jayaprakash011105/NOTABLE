@@ -16,40 +16,10 @@ interface Note {
     archived?: boolean;
 }
 
+
 const Notes = () => {
     const { t } = useTranslation();
-    const [notes, setNotes] = useState<Note[]>([
-        {
-            id: 1,
-            title: 'Meeting Notes',
-            content: 'Discussed project timeline and deliverables for Q1...',
-            date: 'Dec 5, 2024',
-            color: 'bg-yellow-100 dark:bg-yellow-900',
-            pinned: true,
-        },
-        {
-            id: 2,
-            title: 'Shopping List',
-            content: 'Milk, Eggs, Bread, Fruits, Vegetables...',
-            date: 'Dec 4, 2024',
-            color: 'bg-green-100 dark:bg-green-900',
-        },
-        {
-            id: 3,
-            title: 'Ideas',
-            content: 'New app features: dark mode, multi-language support...',
-            date: 'Dec 3, 2024',
-            color: 'bg-blue-100 dark:bg-blue-900',
-            pinned: true,
-        },
-        {
-            id: 4,
-            title: 'Travel Plans',
-            content: 'Book flights for vacation in January, research hotels...',
-            date: 'Dec 2, 2024',
-            color: 'bg-purple-100 dark:bg-purple-900',
-        },
-    ]);
+    const [notes, setNotes] = useState<Note[]>([]);
 
     const [searchQuery, setSearchQuery] = useState('');
     const [showAddModal, setShowAddModal] = useState(false);
