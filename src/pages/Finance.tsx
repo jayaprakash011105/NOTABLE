@@ -274,8 +274,8 @@ const Finance = () => {
 
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-black pb-32">
-            <div className="max-w-md mx-auto px-4 py-6">
+        <div className="min-h-screen bg-gray-50 dark:bg-black pb-32 overflow-x-hidden">
+            <div className="max-w-md mx-auto px-4 sm:px-6 py-4 sm:py-6 w-full">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                     <h1 className="text-2xl font-bold">Finance</h1>
@@ -325,19 +325,21 @@ const Finance = () => {
                 )}
 
                 {/* Tabs */}
-                <div className="flex gap-2 mb-6">
-                    {tabs.map(tab => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
-                            className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition ${activeTab === tab.id
-                                ? 'bg-black dark:bg-white text-white dark:text-black'
-                                : 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
-                                }`}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
+                <div className="-mx-4 sm:mx-0 mb-6 overflow-x-auto scrollbar-hide">
+                    <div className="flex gap-2 px-4 sm:px-0 min-w-max sm:min-w-0">
+                        {tabs.map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all duration-200 flex-shrink-0 ${activeTab === tab.id
+                                    ? 'bg-black dark:bg-white text-white dark:text-black'
+                                    : 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                                    }`}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
                 {/* Overview Tab */}
