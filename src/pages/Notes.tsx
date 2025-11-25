@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Search, Plus, Mic, Image, Pin, MoreHorizontal, X, Grid, List, Copy, Archive, Tag, Palette, SortAsc } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import { Search, Plus, Mic, Image, Pin, MoreHorizontal, X, Grid, List, Copy, Archive, Tag, Palette } from 'lucide-react';
 import ModalWrapper from '../components/ModalWrapper';
 import NoteForm from '../components/NoteForm';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -18,7 +17,6 @@ interface Note {
 
 
 const Notes = () => {
-    const { t } = useTranslation();
     const [notes, setNotes] = useState<Note[]>([]);
 
     const [searchQuery, setSearchQuery] = useState('');

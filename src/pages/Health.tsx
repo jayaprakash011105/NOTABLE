@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Activity, Droplet, Moon, Apple, Heart, Plus, Edit2, Search, Trash2, RotateCcw } from 'lucide-react';
+import { Activity, Droplet, Apple, Heart, Plus, Edit2, Search, Trash2, RotateCcw } from 'lucide-react';
 import { searchFood, calculateNutrients, type FoodItem } from '../utils/foodDatabase';
 import ModalWrapper from '../components/ModalWrapper';
 
@@ -441,14 +441,6 @@ const Health = () => {
     const advice = getPersonalizedAdvice();
     const bmi = healthProfile.setupComplete ? parseFloat(calculateBMI(healthProfile.weight, healthProfile.height)) : 0;
     const bmiInfo = healthProfile.setupComplete ? getBMICategory(bmi) : null;
-
-    // Safety variables for JSX
-    const safeGoals = healthData.goals || { water: 8, exercise: 60, calories: 2000 };
-    const safeSleep = healthData.sleep || { hours: 0, quality: 0, goal: 8 };
-    const safeMood = healthData.mood || 0;
-    const safeWaterLogs = healthData.waterLogs || [];
-    const safeExerciseLogs = healthData.exerciseLogs || [];
-    const safeMealLogs = healthData.mealLogs || [];
 
     // Onboarding Screen
     if (showOnboarding) {

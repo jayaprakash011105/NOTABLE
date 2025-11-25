@@ -49,7 +49,7 @@ const BalanceCard = () => {
         window.addEventListener('storage', handleStorage);
 
         // Listen for custom storage change events (same tab updates)
-        const handleCustomStorage = (e: Event) => {
+        const handleCustomStorage = () => {
             calculateFinancials();
         };
 
