@@ -37,6 +37,15 @@ const Finance = () => {
     const [editingCategory, setEditingCategory] = useState<BudgetCategory | null>(null);
     const [categoryToDelete, setCategoryToDelete] = useState<number | null>(null);
     const [showEditSavings, setShowEditSavings] = useState(false);
+    const [showMonthDropdown, setShowMonthDropdown] = useState(false);
+    const [selectedMonth, setSelectedMonth] = useState(() => {
+        const currentMonth = new Date().getMonth();
+        const months = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        return months[currentMonth];
+    });
 
     const tabs = [
         { id: 'overview' as const, label: 'Overview' },
@@ -48,25 +57,13 @@ const Finance = () => {
     // Load transactions from localStorage or use default
     const [transactions, setTransactions] = useState<Transaction[]>(() => {
         const saved = localStorage.getItem('transactions');
-        return saved ? JSON.parse(saved) : [
-            { id: 1, name: 'Monday Dinner', date: '30/10/2025', category: 'Food & Dining', amount: -150, icon: '🍔' },
-            { id: 2, name: 'Rent', date: '01/11/2025', category: 'Housing & Rent', amount: -1500, icon: '🏠' },
-            { id: 3, name: 'Salary', date: '30/10/2025', category: 'Income', amount: 15000, icon: '💰' },
-            { id: 4, name: 'Friday Lunch', date: '15/11/2025', category: 'Food & Dining', amount: -560, icon: '🍔' },
-            { id: 5, name: 'Movie', date: '22/11/2025', category: 'Entertainment', amount: -250, icon: '🎬' },
-        ];
+        return saved ? JSON.parse(saved) : [];
     });
 
     // Load budget categories from localStorage or use default
     const [budgetCategories, setBudgetCategories] = useState<BudgetCategory[]>(() => {
         const saved = localStorage.getItem('budgetCategories');
-        return saved ? JSON.parse(saved) : [
-            { id: 1, name: 'Home', total: 2000, icon: '🏠' },
-            { id: 2, name: 'Food', total: 1000, icon: '🍔' },
-            { id: 3, name: 'Transport', total: 500, icon: '🚗' },
-            { id: 4, name: 'Shopping', total: 500, icon: '🛍️' },
-            { id: 5, name: 'Entertainment', total: 300, icon: '🎬' },
-        ];
+        return saved ? JSON.parse(saved) : [];
     });
 
     // Monthly budget limit
@@ -78,7 +75,7 @@ const Finance = () => {
     // Savings goal
     const [savingsGoal, setSavingsGoal] = useState(() => {
         const saved = localStorage.getItem('savingsGoal');
-        return saved ? parseFloat(saved) : 10000;
+        return saved ? parseFloat(saved) : 0;
     });
 
     // Save to localStorage whenever data changes
@@ -341,9 +338,37 @@ const Finance = () => {
                                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Balance</p>
                                     <h3 className="text-4xl font-bold">{formatAmount(calculations.currentBalance)}</h3>
                                 </div>
-                                <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl text-sm font-medium">
-                                    <span>Month</span>
+                                <button
+                                    onClick={() => setShowMonthDropdown(!showMonthDropdown)}
+                                    className="relative flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+                                >
+                                    <span>{selectedMonth}</span>
                                     <ChevronRight className="w-4 h-4 rotate-90" />
+
+                                    {showMonthDropdown && (
+                                        <>
+                                            <div
+                                                className="fixed inset-0 z-10"
+                                                onClick={() => setShowMonthDropdown(false)}
+                                            />
+                                            <div className="absolute right-0 top-full mt-2 w-40 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-20 max-h-60 overflow-y-auto">
+                                                {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map((month) => (
+                                                    <button
+                                                        key={month}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setSelectedMonth(month);
+                                                            setShowMonthDropdown(false);
+                                                        }}
+                                                        className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition ${selectedMonth === month ? 'bg-gray-100 dark:bg-gray-700 font-medium' : ''
+                                                            }`}
+                                                    >
+                                                        {month}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </>
+                                    )}
                                 </button>
                             </div>
 
@@ -376,10 +401,13 @@ const Finance = () => {
                         </div>
 
                         {/* Savings */}
-                        <button className="w-full bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                        <button
+                            onClick={() => setActiveTab('savings')}
+                            className="w-full bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                        >
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                                    <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                    <svg className="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                                     </svg>
                                 </div>

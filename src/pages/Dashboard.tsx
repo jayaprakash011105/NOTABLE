@@ -24,11 +24,7 @@ const Dashboard = () => {
         if (savedTasks) {
             return JSON.parse(savedTasks);
         }
-        return [
-            { id: 1, text: 'Do exercise', checked: true, category: 'Health', color: 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' },
-            { id: 2, text: 'Drink water', checked: true, category: 'Health', color: 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200' },
-            { id: 3, text: 'Food', checked: false, category: 'Food', color: 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200' },
-        ];
+        return [];
     });
 
     const [newTaskText, setNewTaskText] = useState('');
