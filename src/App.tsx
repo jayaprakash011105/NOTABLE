@@ -3,6 +3,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { CurrencyProvider } from './contexts/CurrencyContext';
 import { UserProvider } from './contexts/UserContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import Dashboard from './pages/Dashboard';
 import Finance from './pages/Finance';
 import Tasks from './pages/Tasks';
@@ -20,19 +21,21 @@ function App() {
         <LanguageProvider>
           <CurrencyProvider>
             <UserProvider>
-              <Router>
-                <div className="relative min-h-screen">
-                  <Routes>
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/finance" element={<Finance />} />
-                    <Route path="/tasks" element={<Tasks />} />
-                    <Route path="/notes" element={<Notes />} />
-                    <Route path="/health" element={<Health />} />
-                    <Route path="/profile" element={<Profile />} />
-                  </Routes>
-                  <BottomNav />
-                </div>
-              </Router>
+              <NotificationProvider>
+                <Router>
+                  <div className="relative min-h-screen">
+                    <Routes>
+                      <Route path="/" element={<Dashboard />} />
+                      <Route path="/finance" element={<Finance />} />
+                      <Route path="/tasks" element={<Tasks />} />
+                      <Route path="/notes" element={<Notes />} />
+                      <Route path="/health" element={<Health />} />
+                      <Route path="/profile" element={<Profile />} />
+                    </Routes>
+                    <BottomNav />
+                  </div>
+                </Router>
+              </NotificationProvider>
             </UserProvider>
           </CurrencyProvider>
         </LanguageProvider>

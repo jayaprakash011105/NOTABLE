@@ -1,13 +1,16 @@
 import { Home, Wallet, CheckSquare, FileText, Activity } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
+import { useNotifications } from '../contexts/NotificationContext';
 
 const BottomNav = () => {
+    const { taskCount, financeAlertCount } = useNotifications();
+
     const navItems = [
-        { path: '/', icon: Home, label: 'Home' },
-        { path: '/finance', icon: Wallet, label: 'Finance' },
-        { path: '/tasks', icon: CheckSquare, label: 'Tasks' },
-        { path: '/notes', icon: FileText, label: 'Notes' },
-        { path: '/health', icon: Activity, label: 'Health' },
+        { path: '/', icon: Home, label: 'Home', badge: 0 },
+        { path: '/finance', icon: Wallet, label: 'Finance', badge: financeAlertCount },
+        { path: '/tasks', icon: CheckSquare, label: 'Tasks', badge: taskCount },
+        { path: '/notes', icon: FileText, label: 'Notes', badge: 0 },
+        { path: '/health', icon: Activity, label: 'Health', badge: 0 },
     ];
 
     return (
@@ -29,7 +32,7 @@ const BottomNav = () => {
                             {({ isActive }) => (
                                 <>
                                     {/* Icon - compact size */}
-                                    <div className="w-5 h-5 flex items-center justify-center">
+                                    <div className="relative w-5 h-5 flex items-center justify-center">
                                         <item.icon
                                             className={`w-4 h-4 transition-colors duration-150 ${isActive
                                                 ? 'text-white dark:text-black'
@@ -37,6 +40,12 @@ const BottomNav = () => {
                                                 }`}
                                             strokeWidth={2}
                                         />
+                                        {/* Notification Badge */}
+                                        {item.badge > 0 && (
+                                            <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center border border-white dark:border-black">
+                                                {item.badge > 9 ? '9' : item.badge}
+                                            </span>
+                                        )}
                                     </div>
 
                                     {/* Label - compact */}
