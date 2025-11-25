@@ -48,12 +48,26 @@ const BalanceCard = () => {
 
         window.addEventListener('storage', handleStorage);
 
+        // Listen for custom storage change events (same tab updates)
+        const handleCustomStorage = (e: Event) => {
+            calculateFinancials();
+        };
+
+        window.addEventListener('localStorageUpdated', handleCustomStorage);
+
+        // Poll for changes every 2 seconds to catch same-tab updates
+        const pollInterval = setInterval(() => {
+            calculateFinancials();
+        }, 2000);
+
         // Initial calculation
         calculateFinancials();
 
         return () => {
             window.removeEventListener('focus', handleFocus);
             window.removeEventListener('storage', handleStorage);
+            window.removeEventListener('localStorageUpdated', handleCustomStorage);
+            clearInterval(pollInterval);
         };
     }, [selectedMonth]);
 
