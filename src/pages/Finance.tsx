@@ -182,6 +182,39 @@ const Finance = () => {
             ...transactionData,
             icon: categoryIcons[transactionData.category] || '📁'
         };
+
+        // Check budget alerts for expenses
+        if (newTransaction.amount < 0) {
+            const newTransactions = [newTransaction, ...transactions];
+
+            // Calculate new total expenses
+            const newTotalExpenses = newTransactions
+                .filter(t => t.amount < 0)
+                .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+            // Check if total budget exceeded
+            if (newTotalExpenses > monthlyBudgetLimit && monthlyBudgetLimit > 0) {
+                const exceeded = newTotalExpenses - monthlyBudgetLimit;
+                alert(`⚠️ Budget Alert!\n\nYou have exceeded your monthly budget by ${formatAmount(exceeded)}!\n\nTotal Expenses: ${formatAmount(newTotalExpenses)}\nBudget Limit: ${formatAmount(monthlyBudgetLimit)}`);
+            }
+
+            // Check category budget
+            const matchingCategory = budgetCategories.find(c =>
+                transactionData.category.toLowerCase().includes(c.name.toLowerCase())
+            );
+
+            if (matchingCategory) {
+                const categoryExpenses = newTransactions
+                    .filter(t => t.amount < 0 && t.category.toLowerCase().includes(matchingCategory.name.toLowerCase()))
+                    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+                if (categoryExpenses > matchingCategory.total) {
+                    const exceeded = categoryExpenses - matchingCategory.total;
+                    alert(`⚠️ Category Budget Alert!\n\n${matchingCategory.icon} ${matchingCategory.name} budget exceeded by ${formatAmount(exceeded)}!\n\nCategory Expenses: ${formatAmount(categoryExpenses)}\nCategory Budget: ${formatAmount(matchingCategory.total)}`);
+                }
+            }
+        }
+
         setTransactions([newTransaction, ...transactions]);
         setShowAddTransaction(false);
     };
