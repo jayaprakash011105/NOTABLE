@@ -4,6 +4,8 @@ import { useCurrency } from '../contexts/CurrencyContext';
 import ModalWrapper from '../components/ModalWrapper';
 import TransactionForm from '../components/TransactionForm';
 import BudgetForm from '../components/BudgetForm';
+import CategoryForm from '../components/CategoryForm';
+import SavingsGoalForm from '../components/SavingsGoalForm';
 import ConfirmDialog from '../components/ConfirmDialog';
 
 interface Transaction {
@@ -31,6 +33,10 @@ const Finance = () => {
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
     const [transactionToDelete, setTransactionToDelete] = useState<number | null>(null);
     const [showBudgetEdit, setShowBudgetEdit] = useState(false);
+    const [showAddCategory, setShowAddCategory] = useState(false);
+    const [editingCategory, setEditingCategory] = useState<BudgetCategory | null>(null);
+    const [categoryToDelete, setCategoryToDelete] = useState<number | null>(null);
+    const [showEditSavings, setShowEditSavings] = useState(false);
 
     const tabs = [
         { id: 'overview' as const, label: 'Overview' },
@@ -52,7 +58,7 @@ const Finance = () => {
     });
 
     // Load budget categories from localStorage or use default
-    const [budgetCategories] = useState<BudgetCategory[]>(() => {
+    const [budgetCategories, setBudgetCategories] = useState<BudgetCategory[]>(() => {
         const saved = localStorage.getItem('budgetCategories');
         return saved ? JSON.parse(saved) : [
             { id: 1, name: 'Home', total: 2000, icon: '🏠' },
@@ -70,7 +76,7 @@ const Finance = () => {
     });
 
     // Savings goal
-    const [savingsGoal] = useState(() => {
+    const [savingsGoal, setSavingsGoal] = useState(() => {
         const saved = localStorage.getItem('savingsGoal');
         return saved ? parseFloat(saved) : 10000;
     });
@@ -190,6 +196,39 @@ const Finance = () => {
         setMonthlyBudgetLimit(budgetData.total);
         setShowBudgetEdit(false);
     };
+
+    const handleAddCategory = (categoryData: any) => {
+        const newCategory: BudgetCategory = {
+            id: Math.max(...budgetCategories.map(c => c.id), 0) + 1,
+            name: categoryData.name,
+            total: categoryData.total,
+            icon: categoryData.icon || '📁'
+        };
+        setBudgetCategories([...budgetCategories, newCategory]);
+        setShowAddCategory(false);
+    };
+
+    const handleEditCategory = (categoryData: any) => {
+        if (editingCategory) {
+            setBudgetCategories(budgetCategories.map(c =>
+                c.id === editingCategory.id ? { ...c, ...categoryData } : c
+            ));
+            setEditingCategory(null);
+        }
+    };
+
+    const handleDeleteCategory = () => {
+        if (categoryToDelete) {
+            setBudgetCategories(budgetCategories.filter(c => c.id !== categoryToDelete));
+            setCategoryToDelete(null);
+        }
+    };
+
+    const handleSaveSavingsGoal = (goalData: any) => {
+        setSavingsGoal(goalData.goal);
+        setShowEditSavings(false);
+    };
+
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-black pb-32">
@@ -465,15 +504,33 @@ const Finance = () => {
                                             <span className="text-xl">{category.icon}</span>
                                             <span className="font-medium">{category.name}</span>
                                         </div>
-                                        <span className="text-sm font-semibold">
-                                            {formatAmount(category.spent)} / {formatAmount(category.total)}
-                                        </span>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm font-semibold">
+                                                {formatAmount(category.spent)} / {formatAmount(category.total)}
+                                            </span>
+                                            <button
+                                                onClick={() => setEditingCategory(budgetCategories.find(c => c.id === category.id) || null)}
+                                                className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
+                                            </button>
+                                            <button
+                                                onClick={() => setCategoryToDelete(category.id)}
+                                                className="p-1.5 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition text-red-500"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </div>
                                     <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                                         <div
                                             className={`h-full transition-all ${category.percentage > 90 ? 'bg-red-500' :
                                                 category.percentage > 70 ? 'bg-yellow-500' :
-                                                    'bg-blue-500'
+                                                    'bg-gray-800 dark:bg-gray-300'
                                                 }`}
                                             style={{ width: `${category.percentage}%` }}
                                         />
@@ -484,14 +541,29 @@ const Finance = () => {
                                 </div>
                             ))}
                         </div>
+
+                        <button
+                            onClick={() => setShowAddCategory(true)}
+                            className="w-full mt-4 p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                        >
+                            <Plus className="w-5 h-5" />
+                            <span className="font-medium">Add Category</span>
+                        </button>
                     </div>
                 )}
 
-                {/* Savings Tab - Real-time calculated */}
                 {activeTab === 'savings' && (
                     <div className="space-y-4">
-                        <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl p-6 text-white shadow-lg">
-                            <h3 className="text-lg font-semibold mb-2">Savings Goal</h3>
+                        <div className="bg-gradient-to-br from-gray-900 to-gray-800 dark:from-gray-800 dark:to-gray-900 rounded-3xl p-6 text-white shadow-lg">
+                            <div className="flex items-center justify-between mb-2">
+                                <h3 className="text-lg font-semibold">Savings Goal</h3>
+                                <button
+                                    onClick={() => setShowEditSavings(true)}
+                                    className="text-sm px-3 py-1.5 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition"
+                                >
+                                    Edit Goal
+                                </button>
+                            </div>
                             <p className="text-4xl font-bold mb-4">{formatAmount(calculations.currentSavings)}</p>
                             <div className="bg-white/20 backdrop-blur-sm rounded-full h-3 overflow-hidden mb-2">
                                 <div
@@ -565,11 +637,56 @@ const Finance = () => {
 
             {/* Budget Edit Modal */}
             {showBudgetEdit && (
-                <ModalWrapper onClose={() => setShowBudgetEdit(false)} title="Edit Monthly Budget">
+                <ModalWrapper isOpen={showBudgetEdit} onClose={() => setShowBudgetEdit(false)} title="Edit Monthly Budget">
                     <BudgetForm
                         budget={{ total: monthlyBudgetLimit, spent: calculations.totalBudgetSpent }}
                         onSave={handleSaveBudget}
                         onCancel={() => setShowBudgetEdit(false)}
+                    />
+                </ModalWrapper>
+            )}
+
+            {/* Add Category Modal */}
+            {showAddCategory && (
+                <ModalWrapper isOpen={showAddCategory} onClose={() => setShowAddCategory(false)} title="Add Budget Category">
+                    <CategoryForm
+                        onSave={handleAddCategory}
+                        onCancel={() => setShowAddCategory(false)}
+                    />
+                </ModalWrapper>
+            )}
+
+            {/* Edit Category Modal */}
+            {editingCategory && (
+                <ModalWrapper isOpen={!!editingCategory} onClose={() => setEditingCategory(null)} title="Edit Category">
+                    <CategoryForm
+                        category={editingCategory}
+                        onSave={handleEditCategory}
+                        onCancel={() => setEditingCategory(null)}
+                    />
+                </ModalWrapper>
+            )}
+
+            {/* Delete Category Confirmation */}
+            {categoryToDelete && (
+                <ConfirmDialog
+                    isOpen={!!categoryToDelete}
+                    onClose={() => setCategoryToDelete(null)}
+                    title="Delete Category"
+                    message="Are you sure you want to delete this budget category? This action cannot be undone."
+                    confirmText="Delete"
+                    onConfirm={handleDeleteCategory}
+                    variant="danger"
+                />
+            )}
+
+            {/* Edit Savings Goal Modal */}
+            {showEditSavings && (
+                <ModalWrapper isOpen={showEditSavings} onClose={() => setShowEditSavings(false)} title="Edit Savings Goal">
+                    <SavingsGoalForm
+                        currentGoal={savingsGoal}
+                        onSave={handleSaveSavingsGoal}
+                        onCancel={() => setShowEditSavings(false)}
                     />
                 </ModalWrapper>
             )}
