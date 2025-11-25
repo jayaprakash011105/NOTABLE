@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Plus, Mic, Image, Pin, MoreHorizontal, X } from 'lucide-react';
+import { Search, Plus, Mic, Image, Pin, MoreHorizontal, X, Grid, List, Copy, Archive, Tag, Palette, SortAsc } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ModalWrapper from '../components/ModalWrapper';
 import NoteForm from '../components/NoteForm';
@@ -12,6 +12,8 @@ interface Note {
     date: string;
     color: string;
     pinned?: boolean;
+    tags?: string[];
+    archived?: boolean;
 }
 
 const Notes = () => {
@@ -54,6 +56,10 @@ const Notes = () => {
     const [editingNote, setEditingNote] = useState<Note | null>(null);
     const [noteToDelete, setNoteToDelete] = useState<number | null>(null);
     const [showMenuForNote, setShowMenuForNote] = useState<number | null>(null);
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+    const [sortBy, setSortBy] = useState<'date' | 'title' | 'color'>('date');
+    const [showTemplates, setShowTemplates] = useState(false);
+    const [showArchived, setShowArchived] = useState(false);
 
     const handleAddNote = (noteData: Partial<Note>) => {
         const newNote: Note = {
@@ -95,6 +101,48 @@ const Notes = () => {
         setShowMenuForNote(null);
     };
 
+    const handleDuplicateNote = (note: Note) => {
+        const newNote: Note = {
+            ...note,
+            id: Math.max(...notes.map(n => n.id), 0) + 1,
+            title: `${note.title} (Copy)`,
+            date: new Date().toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            }),
+            pinned: false
+        };
+        setNotes([...notes, newNote]);
+        setShowMenuForNote(null);
+    };
+
+    const handleArchiveNote = (id: number) => {
+        setNotes(notes.map(note =>
+            note.id === id ? { ...note, archived: !note.archived } : note
+        ));
+        setShowMenuForNote(null);
+    };
+
+    const useTemplate = (template: Partial<Note>) => {
+        const newNote: Note = {
+            id: Math.max(...notes.map(n => n.id), 0) + 1,
+            title: template.title || '',
+            content: template.content || '',
+            color: template.color || 'bg-yellow-100 dark:bg-yellow-900',
+            date: new Date().toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            }),
+            tags: template.tags || [],
+            pinned: false,
+            archived: false
+        };
+        setNotes([...notes, newNote]);
+        setShowTemplates(false);
+    };
+
     const handleVoiceNote = () => {
         alert('Voice note feature coming soon!');
     };
@@ -103,21 +151,54 @@ const Notes = () => {
         alert('Image note feature coming soon!');
     };
 
-    const filteredNotes = notes.filter(note =>
-        !searchQuery ||
-        note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        note.content.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const templates = [
+        { title: 'Meeting Notes', content: '## Attendees:\n\n## Agenda:\n\n## Action Items:\n', color: 'bg-blue-100 dark:bg-blue-900', tags: ['work', 'meeting'] },
+        { title: 'Shopping List', content: '- \n- \n- \n', color: 'bg-green-100 dark:bg-green-900', tags: ['personal'] },
+        { title: 'To-Do List', content: '[ ] \n[ ] \n[ ] \n', color: 'bg-yellow-100 dark:bg-yellow-900', tags: ['productivity'] },
+        { title: 'Journal Entry', content: `${new Date().toDateString()}\n\nToday I...\n`, color: 'bg-purple-100 dark:bg-purple-900', tags: ['personal', 'journal'] },
+        { title: 'Ideas', content: '💡 Idea 1:\n\n💡 Idea 2:\n\n💡 Idea 3:\n', color: 'bg-pink-100 dark:bg-pink-900', tags: ['brainstorm'] },
+    ];
+
+    const filteredNotes = notes
+        .filter(note => !note.archived || showArchived)
+        .filter(note =>
+            !searchQuery ||
+            note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (note.tags && note.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
+        )
+        .sort((a, b) => {
+            if (sortBy === 'title') return a.title.localeCompare(b.title);
+            if (sortBy === 'color') return a.color.localeCompare(b.color);
+            return 0; // date sorting (keep original order)
+        });
 
     const pinnedNotes = filteredNotes.filter(n => n.pinned);
     const regularNotes = filteredNotes.filter(n => !n.pinned);
 
+    const getWordCount = (text: string) => {
+        return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+    };
+
     const NoteCard = ({ note }: { note: Note }) => (
-        <div className={`${note.color} rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer`}>
+        <div className={`${note.color} rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer relative ${viewMode === 'list' ? 'col-span-2' : ''}`}>
             <div className="flex items-start justify-between mb-2">
-                <h3 className="font-semibold text-base">{note.title}</h3>
+                <div className="flex-1">
+                    <h3 className="font-semibold text-base mb-1">{note.title}</h3>
+                    {note.tags && note.tags.length > 0 && (
+                        <div className="flex gap-1 flex-wrap mb-2">
+                            {note.tags.map((tag, idx) => (
+                                <span key={idx} className="inline-flex items-center gap-1 px-2 py-0.5 bg-white/50 dark:bg-black/20 rounded-full text-xs">
+                                    <Tag className="w-3 h-3" />
+                                    {tag}
+                                </span>
+                            ))}
+                        </div>
+                    )}
+                </div>
                 <div className="flex gap-1">
-                    {note.pinned && <Pin className="w-4 h-4 text-gray-600" />}
+                    {note.pinned && <Pin className="w-4 h-4 text-gray-600 flex-shrink-0" />}
+                    {note.archived && <Archive className="w-4 h-4 text-gray-600 flex-shrink-0" />}
                     <div className="relative">
                         <button
                             onClick={(e) => {
@@ -130,7 +211,7 @@ const Notes = () => {
                         </button>
 
                         {showMenuForNote === note.id && (
-                            <div className="absolute right-0 mt-2 w-32 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-10 animate-slide-down">
+                            <div className="absolute right-0 mt-2 w-36 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-10 animate-slide-down">
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -153,6 +234,26 @@ const Notes = () => {
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
+                                        handleDuplicateNote(note);
+                                    }}
+                                    className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition flex items-center gap-2"
+                                >
+                                    <Copy className="w-3 h-3" />
+                                    Duplicate
+                                </button>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleArchiveNote(note.id);
+                                    }}
+                                    className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition flex items-center gap-2"
+                                >
+                                    <Archive className="w-3 h-3" />
+                                    {note.archived ? 'Unarchive' : 'Archive'}
+                                </button>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
                                         setNoteToDelete(note.id);
                                         setShowMenuForNote(null);
                                     }}
@@ -165,10 +266,13 @@ const Notes = () => {
                     </div>
                 </div>
             </div>
-            <p className="text-sm text-gray-700 dark:text-gray-300 mb-2 line-clamp-2">
+            <p className={`text-sm text-gray-700 dark:text-gray-300 mb-2 ${viewMode === 'grid' ? 'line-clamp-2' : 'line-clamp-3'}`}>
                 {note.content}
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">{note.date}</p>
+            <div className="flex items-center justify-between">
+                <p className="text-xs text-gray-500 dark:text-gray-400">{note.date}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{getWordCount(note.content)} words</p>
+            </div>
         </div>
     );
 
@@ -186,12 +290,82 @@ const Notes = () => {
                     </button>
                 </div>
 
+                {/* Toolbar */}
+                <div className="flex items-center gap-2 mb-4">
+                    {/* View Mode Toggle */}
+                    <div className="flex bg-white dark:bg-gray-800 rounded-xl p-1 border border-gray-200 dark:border-gray-700">
+                        <button
+                            onClick={() => setViewMode('grid')}
+                            className={`p-2 rounded-lg transition ${viewMode === 'grid' ? 'bg-black dark:bg-white text-white dark:text-black' : 'text-gray-600 dark:text-gray-400'}`}
+                        >
+                            <Grid className="w-4 h-4" />
+                        </button>
+                        <button
+                            onClick={() => setViewMode('list')}
+                            className={`p-2 rounded-lg transition ${viewMode === 'list' ? 'bg-black dark:bg-white text-white dark:text-black' : 'text-gray-600 dark:text-gray-400'}`}
+                        >
+                            <List className="w-4 h-4" />
+                        </button>
+                    </div>
+
+                    {/* Sort Dropdown */}
+                    <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value as 'date' | 'title' | 'color')}
+                        className="px-3 py-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 text-sm outline-none flex-1"
+                    >
+                        <option value="date">📅 Date</option>
+                        <option value="title">🔤 Title</option>
+                        <option value="color">🎨 Color</option>
+                    </select>
+
+                    {/* Templates Button */}
+                    <button
+                        onClick={() => setShowTemplates(!showTemplates)}
+                        className="p-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                        title="Templates"
+                    >
+                        <Palette className="w-4 h-4" />
+                    </button>
+
+                    {/* Archive Toggle */}
+                    <button
+                        onClick={() => setShowArchived(!showArchived)}
+                        className={`p-2 rounded-xl border transition ${showArchived ? 'bg-black dark:bg-white text-white dark:text-black border-black dark:border-white' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'}`}
+                        title={showArchived ? 'Hide Archived' : 'Show Archived'}
+                    >
+                        <Archive className="w-4 h-4" />
+                    </button>
+                </div>
+
+                {/* Templates Panel */}
+                {showTemplates && (
+                    <div className="mb-4 p-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
+                        <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                            <Palette className="w-4 h-4" />
+                            Quick Templates
+                        </h3>
+                        <div className="grid grid-cols-2 gap-2">
+                            {templates.map((template, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => useTemplate(template)}
+                                    className={`${template.color} p-3 rounded-xl text-left hover:scale-105 transition-all duration-200 shadow-sm`}
+                                >
+                                    <p className="font-medium text-sm">{template.title}</p>
+                                    <p className="text-xs opacity-75 mt-1">{template.tags?.join(', ')}</p>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {/* Search Bar */}
                 <div className="relative mb-6">
                     <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input
                         type="text"
-                        placeholder="Search notes..."
+                        placeholder="Search notes and tags..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="input-field pl-12"
@@ -230,7 +404,7 @@ const Notes = () => {
                         <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wide">
                             Pinned
                         </h2>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className={`grid ${viewMode === 'grid' ? 'grid-cols-2' : 'grid-cols-1'} gap-3`}>
                             {pinnedNotes.map(note => (
                                 <div key={note.id} onClick={() => setEditingNote(note)}>
                                     <NoteCard note={note} />
@@ -246,7 +420,7 @@ const Notes = () => {
                         All Notes
                     </h2>
                     {regularNotes.length > 0 ? (
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className={`grid ${viewMode === 'grid' ? 'grid-cols-2' : 'grid-cols-1'} gap-3`}>
                             {regularNotes.map(note => (
                                 <div key={note.id} onClick={() => setEditingNote(note)}>
                                     <NoteCard note={note} />
