@@ -356,7 +356,7 @@ const Finance = () => {
                                         className="px-3 py-1.5 bg-white/10 backdrop-blur-sm rounded-full text-xs font-medium hover:bg-white/20 transition flex items-center gap-1"
                                     >
                                         <Plus className="w-3 h-3" />
-                                        Set Bank
+                                        Add Transaction
                                     </button>
                                 </div>
 
@@ -466,20 +466,57 @@ const Finance = () => {
                         </button>
 
                         {/* Investments */}
-                        <button className="w-full bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-                                    <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                        <svg className="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">Total Investments</p>
+                                        <p className="text-2xl font-bold">{formatAmount(0)}</p>
+                                    </div>
                                 </div>
-                                <span className="font-semibold text-lg">Investments</span>
+                                <span className="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-full">Coming Soon</span>
                             </div>
-                            <div className="flex items-center gap-3">
-                                <span className="px-3 py-1 bg-green-500 text-white text-sm font-medium rounded-full">Add</span>
-                                <ChevronRight className="w-5 h-5 text-gray-400" />
+
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-2xl">📈</span>
+                                        <div>
+                                            <p className="font-medium text-sm">Stocks & Mutual Funds</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Track your portfolio</p>
+                                        </div>
+                                    </div>
+                                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                                </div>
+
+                                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-2xl">💎</span>
+                                        <div>
+                                            <p className="font-medium text-sm">Fixed Deposits</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Guaranteed returns</p>
+                                        </div>
+                                    </div>
+                                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                                </div>
+
+                                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-2xl">🪙</span>
+                                        <div>
+                                            <p className="font-medium text-sm">Gold & Commodities</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Diversify investments</p>
+                                        </div>
+                                    </div>
+                                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                                </div>
                             </div>
-                        </button>
+                        </div>
                     </div>
                 )}
 
