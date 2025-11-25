@@ -35,8 +35,8 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     };
 
     const formatAmount = (amount: number): string => {
-        const converted = amount * currency.rate;
-        return `${currency.symbol}${Math.round(converted)}`;
+        // Don't convert - just format with the selected currency symbol
+        return `${currency.symbol}${Math.round(amount).toLocaleString()}`;
     };
 
     return (

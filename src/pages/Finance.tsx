@@ -46,6 +46,7 @@ const Finance = () => {
         ];
         return months[currentMonth];
     });
+    const [transactionFilter, setTransactionFilter] = useState<'all' | 'income' | 'expense'>('all');
 
     const tabs = [
         { id: 'overview' as const, label: 'Overview' },
@@ -164,10 +165,22 @@ const Finance = () => {
     }, [transactions, budgetCategories, monthlyBudgetLimit, savingsGoal]);
 
     const handleAddTransaction = (transactionData: any) => {
+        // Category icon mapping
+        const categoryIcons: Record<string, string> = {
+            'Food & Dining': '🍔',
+            'Housing & Rent': '🏠',
+            'Transportation': '🚗',
+            'Entertainment': '🎬',
+            'Shopping': '🛍️',
+            'Healthcare': '🏥',
+            'Income': '💰',
+            'Other': '📁'
+        };
+
         const newTransaction: Transaction = {
             id: Math.max(...transactions.map(t => t.id), 0) + 1,
             ...transactionData,
-            icon: transactionData.amount > 0 ? '💰' : '💸'
+            icon: categoryIcons[transactionData.category] || '📁'
         };
         setTransactions([newTransaction, ...transactions]);
         setShowAddTransaction(false);
@@ -441,7 +454,25 @@ const Finance = () => {
                 {activeTab === 'transactions' && (
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
-                            <h3 className="font-bold">All Transactions ({transactions.length})</h3>
+                            <div className="flex items-center gap-3">
+                                <h3 className="font-bold">
+                                    {transactionFilter === 'all' ? 'All' : transactionFilter === 'income' ? 'Income' : 'Expense'} Transactions
+                                    ({transactions.filter(t => {
+                                        if (transactionFilter === 'all') return true;
+                                        if (transactionFilter === 'income') return t.amount > 0;
+                                        return t.amount < 0;
+                                    }).length})
+                                </h3>
+                                <select
+                                    value={transactionFilter}
+                                    onChange={(e) => setTransactionFilter(e.target.value as 'all' | 'income' | 'expense')}
+                                    className="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm font-medium border-none outline-none cursor-pointer"
+                                >
+                                    <option value="all">All</option>
+                                    <option value="income">Income</option>
+                                    <option value="expense">Expense</option>
+                                </select>
+                            </div>
                             <button
                                 onClick={() => setShowAddTransaction(true)}
                                 className="flex items-center gap-2 bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-xl font-medium hover:scale-105 transition"
@@ -451,39 +482,45 @@ const Finance = () => {
                             </button>
                         </div>
                         <div className="space-y-3">
-                            {transactions.map(transaction => (
-                                <div key={transaction.id} className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-2xl">{transaction.icon}</span>
-                                            <div>
-                                                <p className="font-medium">{transaction.name}</p>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">{transaction.category}</p>
+                            {transactions
+                                .filter(t => {
+                                    if (transactionFilter === 'all') return true;
+                                    if (transactionFilter === 'income') return t.amount > 0;
+                                    return t.amount < 0;
+                                })
+                                .map(transaction => (
+                                    <div key={transaction.id} className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-2xl">{transaction.icon}</span>
+                                                <div>
+                                                    <p className="font-medium">{transaction.name}</p>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">{transaction.category}</p>
+                                                </div>
+                                            </div>
+                                            <span className={`font-bold ${transaction.amount > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                                {transaction.amount > 0 ? '+' : ''}{formatAmount(transaction.amount)}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                                            <span>{transaction.date}</span>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => setEditingTransaction(transaction)}
+                                                    className="text-blue-500 hover:underline"
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    onClick={() => setTransactionToDelete(transaction.id)}
+                                                    className="text-red-500 hover:underline"
+                                                >
+                                                    Delete
+                                                </button>
                                             </div>
                                         </div>
-                                        <span className={`font-bold ${transaction.amount > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                            {transaction.amount > 0 ? '+' : ''}{formatAmount(transaction.amount)}
-                                        </span>
                                     </div>
-                                    <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                                        <span>{transaction.date}</span>
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => setEditingTransaction(transaction)}
-                                                className="text-blue-500 hover:underline"
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                onClick={() => setTransactionToDelete(transaction.id)}
-                                                className="text-red-500 hover:underline"
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
+                                ))}
                         </div>
                     </div>
                 )}
