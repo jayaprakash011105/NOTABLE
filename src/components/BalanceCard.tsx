@@ -31,6 +31,32 @@ const BalanceCard = () => {
         calculateFinancials();
     }, [selectedMonth]);
 
+    // Recalculate when window regains focus (to catch changes from other tabs/components)
+    useEffect(() => {
+        const handleFocus = () => {
+            calculateFinancials();
+        };
+
+        window.addEventListener('focus', handleFocus);
+
+        // Also listen for storage events (changes from other tabs)
+        const handleStorage = (e: StorageEvent) => {
+            if (e.key === 'transactions') {
+                calculateFinancials();
+            }
+        };
+
+        window.addEventListener('storage', handleStorage);
+
+        // Initial calculation
+        calculateFinancials();
+
+        return () => {
+            window.removeEventListener('focus', handleFocus);
+            window.removeEventListener('storage', handleStorage);
+        };
+    }, [selectedMonth]);
+
     const calculateFinancials = () => {
         // Load transactions from localStorage
         const loadedTransactions = localStorage.getItem('transactions');
