@@ -25,12 +25,16 @@ const Profile = () => {
     const { changeLanguage } = useLanguage();
 
     // Modal states
+    const [showManageAccount, setShowManageAccount] = useState(false);
     const [showAppSettings, setShowAppSettings] = useState(false);
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
     // Display name and email from Firebase Auth
     const userName = user?.displayName || user?.email?.split('@')[0] || 'User';
     const userEmail = user?.email || 'Not available';
+    const accountCreated = user?.metadata?.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : 'Unknown';
+    const lastSignIn = user?.metadata?.lastSignInTime ? new Date(user.metadata.lastSignInTime).toLocaleDateString() : 'Unknown';
+    const authProvider = user?.providerData[0]?.providerId || 'email';
 
     // App Settings
     const [selectedCurrency, setSelectedCurrency] = useState(currency.code);
@@ -124,6 +128,12 @@ const Profile = () => {
     };
 
     const menuSections = [
+        {
+            title: 'Account',
+            items: [
+                { icon: User, label: 'Manage Account', action: () => setShowManageAccount(true) } as MenuItem,
+            ]
+        },
         {
             title: 'Preferences',
             items: [
@@ -229,6 +239,59 @@ const Profile = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Manage Account Modal */}
+            {showManageAccount && (
+                <ModalWrapper
+                    isOpen={showManageAccount}
+                    onClose={() => setShowManageAccount(false)}
+                    title="Manage Account"
+                >
+                    <div className="space-y-4">
+                        {/* Account Info */}
+                        <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 space-y-3">
+                            <div>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Email</p>
+                                <p className="font-medium text-sm">{userEmail}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Display Name</p>
+                                <p className="font-medium text-sm">{userName}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Sign-in Method</p>
+                                <p className="font-medium text-sm capitalize">
+                                    {authProvider === 'google.com' ? 'Google' :
+                                        authProvider === 'apple.com' ? 'Apple' :
+                                            authProvider === 'password' ? 'Email/Password' : authProvider}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Account Created</p>
+                                <p className="font-medium text-sm">{accountCreated}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Last Sign In</p>
+                                <p className="font-medium text-sm">{lastSignIn}</p>
+                            </div>
+                        </div>
+
+                        {/* Info Message */}
+                        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+                            <p className="text-xs text-blue-800 dark:text-blue-300">
+                                💡 To update your name or email, please manage your account through your {authProvider === 'google.com' ? 'Google' : authProvider === 'apple.com' ? 'Apple' : 'authentication'} provider.
+                            </p>
+                        </div>
+
+                        <button
+                            onClick={() => setShowManageAccount(false)}
+                            className="w-full px-6 py-3 bg-gray-200 dark:bg-gray-700 rounded-2xl font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+                        >
+                            Close
+                        </button>
+                    </div>
+                </ModalWrapper>
+            )}
 
             {/* App Settings Modal */}
             {showAppSettings && (
