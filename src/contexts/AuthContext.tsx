@@ -83,9 +83,31 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const loginWithGoogle = async () => {
         try {
             setError(null);
-            await signInWithPopup(auth, googleProvider);
+            // Try popup first, but have redirect as fallback
+            try {
+                await signInWithPopup(auth, googleProvider);
+            } catch (popupError: any) {
+                // If popup is blocked or fails, try redirect
+                if (popupError.code === 'auth/popup-blocked' ||
+                    popupError.code === 'auth/popup-closed-by-user' ||
+                    popupError.code === 'auth/cancelled-popup-request') {
+                    // Use redirect instead
+                    const { signInWithRedirect } = await import('firebase/auth');
+                    await signInWithRedirect(auth, googleProvider);
+                    return; // Return early as redirect will handle the rest
+                }
+                throw popupError;
+            }
         } catch (err: any) {
-            const errorMessage = getErrorMessage(err.code);
+            let errorMessage = getErrorMessage(err.code);
+
+            // Add helpful message for configuration issues
+            if (err.code === 'auth/operation-not-allowed') {
+                errorMessage = 'Google sign-in is not enabled. Please enable Google authentication in Firebase Console: Authentication → Sign-in method → Google';
+            } else if (err.code === 'auth/unauthorized-domain') {
+                errorMessage = 'This domain is not authorized. Add your domain in Firebase Console: Authentication → Settings → Authorized domains';
+            }
+
             setError(errorMessage);
             throw new Error(errorMessage);
         }
@@ -94,9 +116,31 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const loginWithApple = async () => {
         try {
             setError(null);
-            await signInWithPopup(auth, appleProvider);
+            // Try popup first, but have redirect as fallback
+            try {
+                await signInWithPopup(auth, appleProvider);
+            } catch (popupError: any) {
+                // If popup is blocked or fails, try redirect
+                if (popupError.code === 'auth/popup-blocked' ||
+                    popupError.code === 'auth/popup-closed-by-user' ||
+                    popupError.code === 'auth/cancelled-popup-request') {
+                    // Use redirect instead
+                    const { signInWithRedirect } = await import('firebase/auth');
+                    await signInWithRedirect(auth, appleProvider);
+                    return; // Return early as redirect will handle the rest
+                }
+                throw popupError;
+            }
         } catch (err: any) {
-            const errorMessage = getErrorMessage(err.code);
+            let errorMessage = getErrorMessage(err.code);
+
+            // Add helpful message for configuration issues
+            if (err.code === 'auth/operation-not-allowed') {
+                errorMessage = 'Apple sign-in is not enabled. Please enable Apple authentication in Firebase Console: Authentication → Sign-in method → Apple';
+            } else if (err.code === 'auth/unauthorized-domain') {
+                errorMessage = 'This domain is not authorized. Add your domain in Firebase Console: Authentication → Settings → Authorized domains';
+            }
+
             setError(errorMessage);
             throw new Error(errorMessage);
         }
@@ -146,11 +190,15 @@ function getErrorMessage(errorCode: string): string {
         case 'auth/wrong-password':
             return 'Incorrect password.';
         case 'auth/popup-closed-by-user':
-            return 'Sign-in cancelled.';
+            return 'Sign-in cancelled. Please try again.';
         case 'auth/cancelled-popup-request':
             return 'Sign-in cancelled.';
         case 'auth/popup-blocked':
-            return 'Sign-in popup was blocked. Please allow popups for this site.';
+            return 'Sign-in popup was blocked. Please allow popups or try again.';
+        case 'auth/unauthorized-domain':
+            return 'This domain is not authorized. Please add it in Firebase Console.';
+        case 'auth/invalid-api-key':
+            return 'Invalid Firebase API key. Please check your Firebase configuration.';
         default:
             return 'An error occurred. Please try again.';
     }
