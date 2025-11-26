@@ -1,15 +1,31 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Search, Bell, Plus, ChevronRight, X } from 'lucide-react';
 import { useCurrency } from '../contexts/CurrencyContext';
+import { useAuth } from '../contexts/AuthContext';
 import ModalWrapper from '../components/ModalWrapper';
 import TransactionForm from '../components/TransactionForm';
 import BudgetForm from '../components/BudgetForm';
 import CategoryForm from '../components/CategoryForm';
 import SavingsGoalForm from '../components/SavingsGoalForm';
 import ConfirmDialog from '../components/ConfirmDialog';
+import LoadingSpinner from '../components/LoadingSpinner';
+import {
+    subscribeToTransactions,
+    subscribeToBudgetCategories,
+    subscribeToUserSettings,
+    addTransaction as addTransactionToDb,
+    updateTransaction as updateTransactionInDb,
+    deleteTransaction as deleteTransactionFromDb,
+    addBudgetCategory as addCategoryToDb,
+    updateBudgetCategory as updateCategoryInDb,
+    deleteBudgetCategory as deleteCategoryFromDb,
+    saveUserSettings,
+    migrateFromLocalStorage,
+    needsMigration
+} from '../lib/firestoreService';
 
 interface Transaction {
-    id: number;
+    id: string;
     name: string;
     date: string;
     category: string;
@@ -18,7 +34,7 @@ interface Transaction {
 }
 
 interface BudgetCategory {
-    id: number;
+    id: string;
     name: string;
     total: number;
     icon: string;
@@ -27,15 +43,16 @@ interface BudgetCategory {
 const Finance = () => {
     const [activeTab, setActiveTab] = useState<'overview' | 'transactions' | 'budget' | 'savings'>('overview');
     const { formatAmount } = useCurrency();
+    const { user } = useAuth();
     const [showSearch, setShowSearch] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
     const [showAddTransaction, setShowAddTransaction] = useState(false);
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
-    const [transactionToDelete, setTransactionToDelete] = useState<number | null>(null);
+    const [transactionToDelete, setTransactionToDelete] = useState<string | null>(null);
     const [showBudgetEdit, setShowBudgetEdit] = useState(false);
     const [showAddCategory, setShowAddCategory] = useState(false);
     const [editingCategory, setEditingCategory] = useState<BudgetCategory | null>(null);
-    const [categoryToDelete, setCategoryToDelete] = useState<number | null>(null);
+    const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
     const [showEditSavings, setShowEditSavings] = useState(false);
     const [showMonthDropdown, setShowMonthDropdown] = useState(false);
     const [selectedMonth, setSelectedMonth] = useState(() => {
@@ -48,6 +65,13 @@ const Finance = () => {
     });
     const [transactionFilter, setTransactionFilter] = useState<'all' | 'income' | 'expense'>('all');
 
+    // Loading and data states
+    const [loading, setLoading] = useState(true);
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [budgetCategories, setBudgetCategories] = useState<BudgetCategory[]>([]);
+    const [monthlyBudgetLimit, setMonthlyBudgetLimit] = useState(5000);
+    const [savingsGoal, setSavingsGoal] = useState(0);
+
     const tabs = [
         { id: 'overview' as const, label: 'Overview' },
         { id: 'transactions' as const, label: 'Transactions' },
@@ -55,46 +79,56 @@ const Finance = () => {
         { id: 'savings' as const, label: 'Savings' },
     ];
 
-    // Load transactions from localStorage or use default
-    const [transactions, setTransactions] = useState<Transaction[]>(() => {
-        const saved = localStorage.getItem('transactions');
-        return saved ? JSON.parse(saved) : [];
-    });
-
-    // Load budget categories from localStorage or use default
-    const [budgetCategories, setBudgetCategories] = useState<BudgetCategory[]>(() => {
-        const saved = localStorage.getItem('budgetCategories');
-        return saved ? JSON.parse(saved) : [];
-    });
-
-    // Monthly budget limit
-    const [monthlyBudgetLimit, setMonthlyBudgetLimit] = useState(() => {
-        const saved = localStorage.getItem('monthlyBudgetLimit');
-        return saved ? parseFloat(saved) : 5000;
-    });
-
-    // Savings goal
-    const [savingsGoal, setSavingsGoal] = useState(() => {
-        const saved = localStorage.getItem('savingsGoal');
-        return saved ? parseFloat(saved) : 0;
-    });
-
-    // Save to localStorage whenever data changes
+    // Subscribe to Firestore data
     useEffect(() => {
-        localStorage.setItem('transactions', JSON.stringify(transactions));
-    }, [transactions]);
+        if (!user) return;
 
-    useEffect(() => {
-        localStorage.setItem('budgetCategories', JSON.stringify(budgetCategories));
-    }, [budgetCategories]);
+        const userId = user.uid;
 
-    useEffect(() => {
-        localStorage.setItem('monthlyBudgetLimit', monthlyBudgetLimit.toString());
-    }, [monthlyBudgetLimit]);
+        // Check and perform migration if needed
+        if (needsMigration()) {
+            migrateFromLocalStorage(userId)
+                .then(() => console.log('Migration completed'))
+                .catch(err => console.error('Migration failed:', err));
+        }
 
-    useEffect(() => {
-        localStorage.setItem('savingsGoal', savingsGoal.toString());
-    }, [savingsGoal]);
+        // Subscribe to transactions
+        const unsubscribeTransactions = subscribeToTransactions(userId, (data) => {
+            setTransactions(data.map(t => ({
+                id: t.id,
+                name: t.name,
+                date: t.date,
+                category: t.category,
+                amount: t.amount,
+                icon: t.icon
+            })));
+            setLoading(false);
+        });
+
+        // Subscribe to budget categories
+        const unsubscribeBudget = subscribeToBudgetCategories(userId, (data) => {
+            setBudgetCategories(data.map(c => ({
+                id: c.id,
+                name: c.name,
+                total: c.total,
+                icon: c.icon
+            })));
+        });
+
+        // Subscribe to settings
+        const unsubscribeSettings = subscribeToUserSettings(userId, (settings) => {
+            if (settings) {
+                setMonthlyBudgetLimit(settings.monthlyBudgetLimit);
+                setSavingsGoal(settings.savingsGoal);
+            }
+        });
+
+        return () => {
+            unsubscribeTransactions();
+            unsubscribeBudget();
+            unsubscribeSettings();
+        };
+    }, [user]);
 
     // REAL-TIME CALCULATIONS
     const calculations = useMemo(() => {
@@ -164,7 +198,9 @@ const Finance = () => {
         };
     }, [transactions, budgetCategories, monthlyBudgetLimit, savingsGoal]);
 
-    const handleAddTransaction = (transactionData: any) => {
+    const handleAddTransaction = async (transactionData: any) => {
+        if (!user) return;
+
         // Category icon mapping
         const categoryIcons: Record<string, string> = {
             'Food & Dining': '🍔',
@@ -177,100 +213,85 @@ const Finance = () => {
             'Other': '📁'
         };
 
-        const newTransaction: Transaction = {
-            id: Math.max(...transactions.map(t => t.id), 0) + 1,
+        const transactionToAdd = {
             ...transactionData,
             icon: categoryIcons[transactionData.category] || '📁'
         };
 
-        // Check budget alerts for expenses
-        if (newTransaction.amount < 0) {
-            const newTransactions = [newTransaction, ...transactions];
-
-            // Calculate new total expenses
-            const newTotalExpenses = newTransactions
-                .filter(t => t.amount < 0)
-                .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-
-            // Check if total budget exceeded
-            if (newTotalExpenses > monthlyBudgetLimit && monthlyBudgetLimit > 0) {
-                const exceeded = newTotalExpenses - monthlyBudgetLimit;
-                alert(`⚠️ Budget Alert!\n\nYou have exceeded your monthly budget by ${formatAmount(exceeded)}!\n\nTotal Expenses: ${formatAmount(newTotalExpenses)}\nBudget Limit: ${formatAmount(monthlyBudgetLimit)}`);
-            }
-
-            // Check category budget
-            const matchingCategory = budgetCategories.find(c =>
-                transactionData.category.toLowerCase().includes(c.name.toLowerCase())
-            );
-
-            if (matchingCategory) {
-                const categoryExpenses = newTransactions
-                    .filter(t => t.amount < 0 && t.category.toLowerCase().includes(matchingCategory.name.toLowerCase()))
-                    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-
-                if (categoryExpenses > matchingCategory.total) {
-                    const exceeded = categoryExpenses - matchingCategory.total;
-                    alert(`⚠️ Category Budget Alert!\n\n${matchingCategory.icon} ${matchingCategory.name} budget exceeded by ${formatAmount(exceeded)}!\n\nCategory Expenses: ${formatAmount(categoryExpenses)}\nCategory Budget: ${formatAmount(matchingCategory.total)}`);
-                }
-            }
-        }
-
-        setTransactions([newTransaction, ...transactions]);
+        // Add to Firestore
+        await addTransactionToDb(user.uid, transactionToAdd);
         setShowAddTransaction(false);
     };
 
-    const handleEditTransaction = (transactionData: any) => {
-        if (editingTransaction) {
-            setTransactions(transactions.map(t =>
-                t.id === editingTransaction.id ? { ...t, ...transactionData } : t
-            ));
-            setEditingTransaction(null);
-        }
+    const handleEditTransaction = async (transactionData: any) => {
+        if (!user || !editingTransaction) return;
+
+        await updateTransactionInDb(user.uid, editingTransaction.id, transactionData);
+        setEditingTransaction(null);
     };
 
-    const handleDeleteTransaction = () => {
-        if (transactionToDelete) {
-            setTransactions(transactions.filter(t => t.id !== transactionToDelete));
-            setTransactionToDelete(null);
-        }
+    const handleDeleteTransaction = async () => {
+        if (!user || !transactionToDelete) return;
+
+        await deleteTransactionFromDb(user.uid, transactionToDelete);
+        setTransactionToDelete(null);
     };
 
-    const handleSaveBudget = (budgetData: any) => {
-        setMonthlyBudgetLimit(budgetData.total);
+    const handleSaveBudget = async (budgetData: any) => {
+        if (!user) return;
+
+        await saveUserSettings(user.uid, {
+            monthlyBudgetLimit: budgetData.total,
+            savingsGoal
+        });
         setShowBudgetEdit(false);
     };
 
-    const handleAddCategory = (categoryData: any) => {
-        const newCategory: BudgetCategory = {
-            id: Math.max(...budgetCategories.map(c => c.id), 0) + 1,
+    const handleAddCategory = async (categoryData: any) => {
+        if (!user) return;
+
+        const categoryToAdd = {
             name: categoryData.name,
             total: categoryData.total,
             icon: categoryData.icon || '📁'
         };
-        setBudgetCategories([...budgetCategories, newCategory]);
+
+        await addCategoryToDb(user.uid, categoryToAdd);
         setShowAddCategory(false);
     };
 
-    const handleEditCategory = (categoryData: any) => {
-        if (editingCategory) {
-            setBudgetCategories(budgetCategories.map(c =>
-                c.id === editingCategory.id ? { ...c, ...categoryData } : c
-            ));
-            setEditingCategory(null);
-        }
+    const handleEditCategory = async (categoryData: any) => {
+        if (!user || !editingCategory) return;
+
+        await updateCategoryInDb(user.uid, editingCategory.id, categoryData);
+        setEditingCategory(null);
     };
 
-    const handleDeleteCategory = () => {
-        if (categoryToDelete) {
-            setBudgetCategories(budgetCategories.filter(c => c.id !== categoryToDelete));
-            setCategoryToDelete(null);
-        }
+    const handleDeleteCategory = async () => {
+        if (!user || !categoryToDelete) return;
+
+        await deleteCategoryFromDb(user.uid, categoryToDelete);
+        setCategoryToDelete(null);
     };
 
-    const handleSaveSavingsGoal = (goalData: any) => {
-        setSavingsGoal(goalData.goal);
+    const handleSaveSavingsGoal = async (goalData: any) => {
+        if (!user) return;
+
+        await saveUserSettings(user.uid, {
+            monthlyBudgetLimit,
+            savingsGoal: goalData.goal
+        });
         setShowEditSavings(false);
     };
+
+    // Show loading state
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black">
+                <LoadingSpinner size="lg" />
+            </div>
+        );
+    }
 
 
     return (

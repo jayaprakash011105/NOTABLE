@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 interface TransactionFormProps {
     transaction?: {
-        id: number;
+        id: string;
         name: string;
         amount: number;
         category: string;
@@ -59,8 +59,8 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ transaction, onSave, 
                         type="button"
                         onClick={() => setFormData({ ...formData, type: 'expense' })}
                         className={`flex-1 py-2 rounded-xl font-medium transition ${formData.type === 'expense'
-                                ? 'bg-red-500 text-white'
-                                : 'bg-gray-200 dark:bg-gray-700'
+                            ? 'bg-red-500 text-white'
+                            : 'bg-gray-200 dark:bg-gray-700'
                             }`}
                     >
                         Expense
@@ -69,8 +69,8 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ transaction, onSave, 
                         type="button"
                         onClick={() => setFormData({ ...formData, type: 'income' })}
                         className={`flex-1 py-2 rounded-xl font-medium transition ${formData.type === 'income'
-                                ? 'bg-green-500 text-white'
-                                : 'bg-gray-200 dark:bg-gray-700'
+                            ? 'bg-green-500 text-white'
+                            : 'bg-gray-200 dark:bg-gray-700'
                             }`}
                     >
                         Income

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 interface CategoryFormProps {
     category?: {
-        id: number;
+        id: string;
         name: string;
         total: number;
         icon: string;
@@ -75,8 +75,8 @@ const CategoryForm: React.FC<CategoryFormProps> = ({ category, onSave, onCancel 
                             type="button"
                             onClick={() => setIcon(emoji)}
                             className={`p-3 rounded-lg text-2xl transition ${icon === emoji
-                                    ? 'bg-black dark:bg-white'
-                                    : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                ? 'bg-black dark:bg-white'
+                                : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
                                 }`}
                         >
                             {emoji}
