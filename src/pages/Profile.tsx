@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ArrowLeft, User, Settings, FileText, Link2, Upload, ChevronRight, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from '../contexts/UserContext';
+import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -19,7 +19,7 @@ interface MenuItem {
 
 const Profile = () => {
     const navigate = useNavigate();
-    const { userName, userEmail, setUserName, setUserEmail } = useUser();
+    const { user, logout } = useAuth();
     const { isDark, toggleTheme } = useTheme();
     const { currency, changeCurrency } = useCurrency();
     const { changeLanguage } = useLanguage();
@@ -29,9 +29,9 @@ const Profile = () => {
     const [showAppSettings, setShowAppSettings] = useState(false);
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
-    // Edit profile form
-    const [editName, setEditName] = useState(userName);
-    const [editEmail, setEditEmail] = useState(userEmail);
+    // Display name and email from Firebase Auth
+    const userName = user?.displayName || user?.email?.split('@')[0] || 'User';
+    const userEmail = user?.email || 'Not available';
 
     // App Settings
     const [selectedCurrency, setSelectedCurrency] = useState(currency.code);
@@ -69,12 +69,6 @@ const Profile = () => {
     // Advanced Settings
     const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
 
-    const handleSaveProfile = () => {
-        setUserName(editName);
-        setUserEmail(editEmail);
-        setShowEditProfile(false);
-    };
-
     const handleSaveAppSettings = () => {
         changeCurrency(selectedCurrency);
         changeLanguage(selectedLanguage);
@@ -84,10 +78,15 @@ const Profile = () => {
         setShowAppSettings(false);
     };
 
-    const handleLogout = () => {
-        console.log('Logging out...');
-        navigate('/');
-        setShowLogoutConfirm(false);
+    const handleLogout = async () => {
+        try {
+            await logout();
+            setShowLogoutConfirm(false);
+            navigate('/login');
+        } catch (error) {
+            console.error('Error logging out:', error);
+            alert('Failed to logout. Please try again.');
+        }
     };
 
     const handleSaveTodoPreferences = () => {
@@ -126,12 +125,6 @@ const Profile = () => {
     };
 
     const menuSections = [
-        {
-            title: 'Account',
-            items: [
-                { icon: User, label: 'Manage Account', action: () => setShowEditProfile(true) } as MenuItem,
-            ]
-        },
         {
             title: 'Preferences',
             items: [
@@ -237,50 +230,6 @@ const Profile = () => {
                     </div>
                 </div>
             </div>
-
-            {/* Edit Profile Modal */}
-            {showEditProfile && (
-                <ModalWrapper
-                    isOpen={showEditProfile}
-                    onClose={() => setShowEditProfile(false)}
-                    title="Edit Profile"
-                >
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-2">Name</label>
-                            <input
-                                type="text"
-                                value={editName}
-                                onChange={(e) => setEditName(e.target.value)}
-                                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-black dark:focus:ring-white"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-2">Email</label>
-                            <input
-                                type="email"
-                                value={editEmail}
-                                onChange={(e) => setEditEmail(e.target.value)}
-                                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-black dark:focus:ring-white"
-                            />
-                        </div>
-                        <div className="flex gap-3 pt-4">
-                            <button
-                                onClick={() => setShowEditProfile(false)}
-                                className="flex-1 px-6 py-3 bg-gray-200 dark:bg-gray-700 rounded-2xl font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleSaveProfile}
-                                className="flex-1 px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-medium hover:scale-105 transition"
-                            >
-                                Save
-                            </button>
-                        </div>
-                    </div>
-                </ModalWrapper>
-            )}
 
             {/* App Settings Modal */}
             {showAppSettings && (
