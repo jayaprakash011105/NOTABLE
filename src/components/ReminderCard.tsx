@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, X, Bell, Clock, Edit2, Trash2 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import {
+    subscribeToReminders,
+    addReminder,
+    updateReminder,
+    deleteReminder
+} from '../lib/firestoreService';
 
 interface Reminder {
-    id: number;
+    id: string;
     title: string;
     description: string;
     dateTime: string; // ISO string format
@@ -10,29 +17,35 @@ interface Reminder {
 }
 
 const ReminderCard: React.FC = () => {
-    const [reminders, setReminders] = useState<Reminder[]>(() => {
-        const saved = localStorage.getItem('reminders');
-        return saved ? JSON.parse(saved) : [];
-    });
-
+    const { user } = useAuth();
+    const [reminders, setReminders] = useState<Reminder[]>([]);
     const [showAddForm, setShowAddForm] = useState(false);
-    const [editingId, setEditingId] = useState<number | null>(null);
+    const [editingId, setEditingId] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         title: '',
         description: '',
         dateTime: ''
     });
 
-    // Save to localStorage whenever reminders change
+    // Subscribe to Firestore Reminders
     useEffect(() => {
-        localStorage.setItem('reminders', JSON.stringify(reminders));
-    }, [reminders]);
+        if (!user) return;
+
+        const userId = user.uid;
+        const unsubscribe = subscribeToReminders(userId, (data) => {
+            setReminders(data);
+        });
+
+        return () => unsubscribe();
+    }, [user]);
 
     // Check for due reminders every minute
     useEffect(() => {
-        const checkReminders = () => {
+        const checkReminders = async () => {
+            if (!user) return;
+
             const now = new Date();
-            reminders.forEach(reminder => {
+            for (const reminder of reminders) {
                 const reminderTime = new Date(reminder.dateTime);
                 if (!reminder.notified && reminderTime <= now) {
                     // Show browser notification
@@ -44,12 +57,10 @@ const ReminderCard: React.FC = () => {
                         });
                     }
 
-                    // Mark as notified
-                    setReminders(prev => prev.map(r =>
-                        r.id === reminder.id ? { ...r, notified: true } : r
-                    ));
+                    // Mark as notified in Firestore
+                    await updateReminder(user.uid, reminder.id, { notified: true });
                 }
-            });
+            }
         };
 
         // Request notification permission on mount
@@ -61,37 +72,38 @@ const ReminderCard: React.FC = () => {
         checkReminders(); // Check immediately
 
         return () => clearInterval(interval);
-    }, [reminders]);
+    }, [reminders, user]);
 
-    const handleAddReminder = () => {
-        if (formData.title && formData.dateTime) {
-            const newReminder: Reminder = {
-                id: Date.now(),
+    const handleAddReminder = async () => {
+        if (formData.title && formData.dateTime && user) {
+            await addReminder(user.uid, {
                 title: formData.title,
                 description: formData.description,
                 dateTime: formData.dateTime,
                 notified: false
-            };
-            setReminders([...reminders, newReminder]);
+            });
             setFormData({ title: '', description: '', dateTime: '' });
             setShowAddForm(false);
         }
     };
 
-    const handleEditReminder = () => {
-        if (editingId && formData.title && formData.dateTime) {
-            setReminders(reminders.map(r =>
-                r.id === editingId
-                    ? { ...r, title: formData.title, description: formData.description, dateTime: formData.dateTime, notified: false }
-                    : r
-            ));
+    const handleEditReminder = async () => {
+        if (editingId && formData.title && formData.dateTime && user) {
+            await updateReminder(user.uid, editingId, {
+                title: formData.title,
+                description: formData.description,
+                dateTime: formData.dateTime,
+                notified: false
+            });
             setFormData({ title: '', description: '', dateTime: '' });
             setEditingId(null);
         }
     };
 
-    const handleDeleteReminder = (id: number) => {
-        setReminders(reminders.filter(r => r.id !== id));
+    const handleDeleteReminder = async (id: string) => {
+        if (user) {
+            await deleteReminder(user.uid, id);
+        }
     };
 
     const startEdit = (reminder: Reminder) => {

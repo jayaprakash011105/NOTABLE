@@ -305,9 +305,9 @@ export const subscribeToQuickTasks = (
 export interface Reminder {
     id: string;
     title: string;
-    time: string;
-    icon: string;
-    color: string;
+    description: string;
+    dateTime: string; // ISO string format
+    notified: boolean;
     createdAt: Date;
 }
 
