@@ -55,7 +55,7 @@
   }
 
   .modal-content {
-    @apply bg-white dark:bg-gray-800 rounded-3xl p-6 w-full max-w-md shadow-2xl;
+    @apply bg-white dark:bg-gray-800 rounded-3xl p-4 sm:p-6 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto;
     animation: slideUp 0.3s ease-out;
   }
 }
