@@ -86,11 +86,13 @@ const Finance = () => {
         const userId = user.uid;
 
         // Check and perform migration if needed
-        if (needsMigration()) {
-            migrateFromLocalStorage(userId)
-                .then(() => console.log('Migration completed'))
-                .catch(err => console.error('Migration failed:', err));
-        }
+        needsMigration(userId).then(shouldMigrate => {
+            if (shouldMigrate) {
+                migrateFromLocalStorage(userId)
+                    .then(() => console.log('Migration completed'))
+                    .catch(err => console.error('Migration failed:', err));
+            }
+        });
 
         // Subscribe to transactions
         const unsubscribeTransactions = subscribeToTransactions(userId, (data) => {

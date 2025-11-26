@@ -277,14 +277,19 @@ export const migrateFromLocalStorage = async (userId: string) => {
             console.log('Migrated user settings');
         }
 
+        // Set migration flag in Firestore (not localStorage)
+        const migrationRef = doc(db, 'users', userId, 'settings', 'migration');
+        await setDoc(migrationRef, {
+            migrated: true,
+            migratedAt: Timestamp.now()
+        });
+
         // Clear localStorage after successful migration
         localStorage.removeItem('transactions');
         localStorage.removeItem('budgetCategories');
         localStorage.removeItem('monthlyBudgetLimit');
         localStorage.removeItem('savingsGoal');
-
-        // Set migration flag
-        localStorage.setItem('dataMigrated', 'true');
+        localStorage.removeItem('dataMigrated'); // Remove old flag
 
         console.log('Data migration completed successfully');
     } catch (error) {
@@ -293,15 +298,30 @@ export const migrateFromLocalStorage = async (userId: string) => {
     }
 };
 
-// Check if migration is needed
-export const needsMigration = (): boolean => {
-    const migrated = localStorage.getItem('dataMigrated');
-    const hasLocalData = !!(
-        localStorage.getItem('transactions') ||
-        localStorage.getItem('budgetCategories') ||
-        localStorage.getItem('monthlyBudgetLimit') ||
-        localStorage.getItem('savingsGoal')
-    );
+// Check if migration is needed (check Firestore, not localStorage)
+export const needsMigration = async (userId: string): Promise<boolean> => {
+    try {
+        // Check if migration flag exists in Firestore
+        const migrationRef = doc(db, 'users', userId, 'settings', 'migration');
+        const migrationDoc = await getDoc(migrationRef);
 
-    return !migrated && hasLocalData;
+        if (migrationDoc.exists()) {
+            // Already migrated
+            return false;
+        }
+
+        // Check if there's local data to migrate
+        const hasLocalData = !!(
+            localStorage.getItem('transactions') ||
+            localStorage.getItem('budgetCategories') ||
+            localStorage.getItem('monthlyBudgetLimit') ||
+            localStorage.getItem('savingsGoal')
+        );
+
+        return hasLocalData;
+    } catch (error) {
+        console.error('Error checking migration status:', error);
+        return false;
+    }
 };
+
