@@ -1,12 +1,15 @@
 import { Bell, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from '../contexts/UserContext';
+import { useAuth } from '../contexts/AuthContext';
 import { useNotifications } from '../contexts/NotificationContext';
 
 const Header = () => {
     const navigate = useNavigate();
-    const { userName } = useUser();
+    const { user } = useAuth();
     const { unreadCount } = useNotifications();
+
+    // Get user name from Firebase auth
+    const userName = user?.displayName || user?.email?.split('@')[0] || 'User';
 
     return (
         <div className="w-full bg-white dark:bg-black shadow-sm transition-colors duration-200">
@@ -16,7 +19,7 @@ const Header = () => {
                     <div>
                         <h1 className="text-sm text-gray-600 dark:text-gray-400">Hello,</h1>
                         <h2 className="text-base font-bold text-gray-900 dark:text-white truncate max-w-[160px]">
-                            {userName || 'User'}
+                            {userName}
                         </h2>
                     </div>
 
