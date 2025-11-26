@@ -238,6 +238,130 @@ export const subscribeToUserSettings = (
     });
 };
 
+// ==================== QUICK TASKS ====================
+
+export interface QuickTask {
+    id: string;
+    text: string;
+    checked: boolean;
+    category?: string;
+    color?: string;
+    createdAt: Date;
+}
+
+export const addQuickTask = async (userId: string, task: Omit<QuickTask, 'id' | 'createdAt'>) => {
+    try {
+        const tasksRef = getUserCollection(userId, 'quickTasks');
+        const docRef = await addDoc(tasksRef, {
+            ...task,
+            createdAt: Timestamp.now()
+        });
+        return docRef.id;
+    } catch (error) {
+        console.error('Error adding quick task:', error);
+        throw error;
+    }
+};
+
+export const updateQuickTask = async (userId: string, taskId: string, data: Partial<QuickTask>) => {
+    try {
+        const taskRef = doc(db, 'users', userId, 'quickTasks', taskId);
+        await updateDoc(taskRef, data);
+    } catch (error) {
+        console.error('Error updating quick task:', error);
+        throw error;
+    }
+};
+
+export const deleteQuickTask = async (userId: string, taskId: string) => {
+    try {
+        const taskRef = doc(db, 'users', userId, 'quickTasks', taskId);
+        await deleteDoc(taskRef);
+    } catch (error) {
+        console.error('Error deleting quick task:', error);
+        throw error;
+    }
+};
+
+export const subscribeToQuickTasks = (
+    userId: string,
+    callback: (tasks: QuickTask[]) => void
+): Unsubscribe => {
+    const tasksRef = getUserCollection(userId, 'quickTasks');
+    const q = query(tasksRef, orderBy('createdAt', 'asc'));
+
+    return onSnapshot(q, (snapshot) => {
+        const tasks = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: doc.data().createdAt?.toDate() || new Date()
+        })) as QuickTask[];
+        callback(tasks);
+    });
+};
+
+// ==================== REMINDERS ====================
+
+export interface Reminder {
+    id: string;
+    title: string;
+    time: string;
+    icon: string;
+    color: string;
+    createdAt: Date;
+}
+
+export const addReminder = async (userId: string, reminder: Omit<Reminder, 'id' | 'createdAt'>) => {
+    try {
+        const remindersRef = getUserCollection(userId, 'reminders');
+        const docRef = await addDoc(remindersRef, {
+            ...reminder,
+            createdAt: Timestamp.now()
+        });
+        return docRef.id;
+    } catch (error) {
+        console.error('Error adding reminder:', error);
+        throw error;
+    }
+};
+
+export const updateReminder = async (userId: string, reminderId: string, data: Partial<Reminder>) => {
+    try {
+        const reminderRef = doc(db, 'users', userId, 'reminders', reminderId);
+        await updateDoc(reminderRef, data);
+    } catch (error) {
+        console.error('Error updating reminder:', error);
+        throw error;
+    }
+};
+
+export const deleteReminder = async (userId: string, reminderId: string) => {
+    try {
+        const reminderRef = doc(db, 'users', userId, 'reminders', reminderId);
+        await deleteDoc(reminderRef);
+    } catch (error) {
+        console.error('Error deleting reminder:', error);
+        throw error;
+    }
+};
+
+export const subscribeToReminders = (
+    userId: string,
+    callback: (reminders: Reminder[]) => void
+): Unsubscribe => {
+    const remindersRef = getUserCollection(userId, 'reminders');
+    const q = query(remindersRef, orderBy('createdAt', 'asc'));
+
+    return onSnapshot(q, (snapshot) => {
+        const reminders = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: doc.data().createdAt?.toDate() || new Date()
+        })) as Reminder[];
+        callback(reminders);
+    });
+};
+
 // ==================== DATA MIGRATION ====================
 
 export const migrateFromLocalStorage = async (userId: string) => {

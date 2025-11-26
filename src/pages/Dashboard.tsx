@@ -1,14 +1,21 @@
 import { useState, useEffect } from 'react';
 import { Plus, X, Edit2, Check } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import Header from '../components/Header';
 import BalanceCard from '../components/BalanceCard';
 import Calendar from '../components/Calendar';
 import ReminderCard from '../components/ReminderCard';
 import ExpenseChart from '../components/ExpenseChart';
 import ConfirmDialog from '../components/ConfirmDialog';
+import {
+    subscribeToQuickTasks,
+    addQuickTask,
+    updateQuickTask,
+    deleteQuickTask
+} from '../lib/firestoreService';
 
 interface Task {
-    id: number;
+    id: string;
     text: string;
     checked: boolean;
     category?: string;
@@ -16,24 +23,15 @@ interface Task {
 }
 
 const Dashboard = () => {
-
-
-    // Load tasks from localStorage on mount
-    const [quickTasks, setQuickTasks] = useState<Task[]>(() => {
-        const savedTasks = localStorage.getItem('quickTasks');
-        if (savedTasks) {
-            return JSON.parse(savedTasks);
-        }
-        return [];
-    });
-
+    const { user } = useAuth();
+    const [quickTasks, setQuickTasks] = useState<Task[]>([]);
     const [newTaskText, setNewTaskText] = useState('');
     const [showAddTask, setShowAddTask] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('Personal');
-    const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
+    const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
     const [editingText, setEditingText] = useState('');
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-    const [taskToDelete, setTaskToDelete] = useState<number | null>(null);
+    const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
 
     const categories = [
         { name: 'Personal', color: 'bg-purple-100 dark:bg-gray-700 text-purple-800 dark:text-gray-200' },
@@ -42,40 +40,47 @@ const Dashboard = () => {
         { name: 'Food', color: 'bg-orange-100 dark:bg-gray-700 text-orange-800 dark:text-gray-200' },
     ];
 
-    // Save tasks to localStorage whenever they change
+    // Subscribe to Firestore Quick Tasks
     useEffect(() => {
-        localStorage.setItem('quickTasks', JSON.stringify(quickTasks));
-    }, [quickTasks]);
+        if (!user) return;
 
-    const handleToggleTask = (id: number) => {
-        setQuickTasks(quickTasks.map(task =>
-            task.id === id ? { ...task, checked: !task.checked } : task
-        ));
+        const userId = user.uid;
+        const unsubscribe = subscribeToQuickTasks(userId, (tasks) => {
+            setQuickTasks(tasks);
+        });
+
+        return () => unsubscribe();
+    }, [user]);
+
+    const handleToggleTask = async (id: string) => {
+        if (!user) return;
+        const task = quickTasks.find(t => t.id === id);
+        if (task) {
+            await updateQuickTask(user.uid, id, { checked: !task.checked });
+        }
     };
 
-    const handleDeleteTask = (id: number) => {
+    const handleDeleteTask = (id: string) => {
         setTaskToDelete(id);
         setShowDeleteConfirm(true);
     };
 
-    const confirmDelete = () => {
-        if (taskToDelete !== null) {
-            setQuickTasks(quickTasks.filter(task => task.id !== taskToDelete));
+    const confirmDelete = async () => {
+        if (taskToDelete !== null && user) {
+            await deleteQuickTask(user.uid, taskToDelete);
             setTaskToDelete(null);
         }
     };
 
-    const handleAddTask = () => {
-        if (newTaskText.trim()) {
+    const handleAddTask = async () => {
+        if (newTaskText.trim() && user) {
             const categoryData = categories.find(c => c.name === selectedCategory);
-            const newTask: Task = {
-                id: Math.max(...quickTasks.map(t => t.id), 0) + 1,
+            await addQuickTask(user.uid, {
                 text: newTaskText,
                 checked: false,
                 category: selectedCategory,
                 color: categoryData?.color
-            };
-            setQuickTasks([...quickTasks, newTask]);
+            });
             setNewTaskText('');
             setShowAddTask(false);
         }
@@ -86,11 +91,9 @@ const Dashboard = () => {
         setEditingText(task.text);
     };
 
-    const handleSaveEdit = (id: number) => {
-        if (editingText.trim()) {
-            setQuickTasks(quickTasks.map(task =>
-                task.id === id ? { ...task, text: editingText } : task
-            ));
+    const handleSaveEdit = async (id: string) => {
+        if (editingText.trim() && user) {
+            await updateQuickTask(user.uid, id, { text: editingText });
         }
         setEditingTaskId(null);
         setEditingText('');
