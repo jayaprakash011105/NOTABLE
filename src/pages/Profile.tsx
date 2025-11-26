@@ -225,6 +225,19 @@ const Profile = () => {
                         </div>
                     ))}
                 </div>
+
+                {/* User Info Footer */}
+                <div className="mt-8 p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm">
+                    <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-black dark:bg-white flex items-center justify-center">
+                            <User className="w-6 h-6 text-white dark:text-black" />
+                        </div>
+                        <div>
+                            <p className="font-semibold text-gray-900 dark:text-gray-100">{userName}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{userEmail}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* Manage Account Modal */}

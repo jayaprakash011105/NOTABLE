@@ -12,7 +12,7 @@ const Header = () => {
     const userName = user?.displayName || user?.email?.split('@')[0] || 'User';
 
     return (
-        <div className="w-full bg-white dark:bg-black shadow-sm transition-colors duration-200">
+        <div className="w-full shadow-sm transition-colors duration-200">
             <div className="max-w-md mx-auto px-4 py-3">
                 <div className="flex items-center justify-between">
                     {/* User Greeting */}
