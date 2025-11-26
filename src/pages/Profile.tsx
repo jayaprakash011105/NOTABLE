@@ -25,7 +25,6 @@ const Profile = () => {
     const { changeLanguage } = useLanguage();
 
     // Modal states
-    const [showEditProfile, setShowEditProfile] = useState(false);
     const [showAppSettings, setShowAppSettings] = useState(false);
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
