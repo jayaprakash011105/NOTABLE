@@ -5,13 +5,14 @@ import { getFirestore } from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 
 const firebaseConfig = {
-    apiKey: "AIzaSyA5vGR9FPCs3cafZVn9BhNwpJwS8rQt7Pc",
-    authDomain: "notable-05.firebaseapp.com",
-    projectId: "notable-05",
-    storageBucket: "notable-05.firebasestorage.app",
-    messagingSenderId: "532719545728",
-    appId: "1:532719545728:web:00db6b68c60c3395eba565",
-    measurementId: "G-5KYFE1TKHL"
+    apiKey: "AIzaSyBd1bHB3QijW3wUOSvMcxEmvWYpdKRcOL4",
+    authDomain: "notable-54242.firebaseapp.com",
+    databaseURL: "https://notable-54242-default-rtdb.firebaseio.com",
+    projectId: "notable-54242",
+    storageBucket: "notable-54242.firebasestorage.app",
+    messagingSenderId: "127677345216",
+    appId: "1:127677345216:web:b00a6328e156fbc460ec25",
+    measurementId: "G-M3ZP4DT6FV"
 };
 
 // Initialize Firebase
