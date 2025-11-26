@@ -346,8 +346,8 @@ const Finance = () => {
                 )}
 
                 {/* Tabs */}
-                <div className="-mx-4 sm:mx-0 mb-6 overflow-x-auto scrollbar-hide">
-                    <div className="flex gap-2 px-4 sm:px-0 min-w-max sm:min-w-0">
+                <div className="-mx-4 sm:mx-0 mb-6 overflow-x-auto scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
+                    <div className="flex gap-2 px-4 sm:px-0" style={{ minWidth: 'max-content' }}>
                         {tabs.map(tab => (
                             <button
                                 key={tab.id}
