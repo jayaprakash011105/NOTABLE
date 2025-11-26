@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useCurrency } from '../contexts/CurrencyContext';
+import { useAuth } from '../contexts/AuthContext';
+import { subscribeToTransactions } from '../lib/firestoreService';
 
 interface Transaction {
-    id: number;
+    id: string;
     name: string;
     amount: number;
     category: string;
     date: string;
-    type?: 'income' | 'expense';
+    icon: string;
 }
 
 // Define months array outside component so it can be used in initialization
@@ -18,6 +20,7 @@ const months = [
 
 const BalanceCard = () => {
     const { formatAmount } = useCurrency();
+    const { user } = useAuth();
     const [showMonthDropdown, setShowMonthDropdown] = useState(false);
     const [selectedMonth, setSelectedMonth] = useState(() => {
         const currentMonth = new Date().getMonth();
@@ -26,56 +29,33 @@ const BalanceCard = () => {
     const [balance, setBalance] = useState(0);
     const [income, setIncome] = useState(0);
     const [expense, setExpense] = useState(0);
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
 
+    // Subscribe to Firestore transactions
+    useEffect(() => {
+        if (!user) return;
+
+        const userId = user.uid;
+        const unsubscribe = subscribeToTransactions(userId, (data) => {
+            setTransactions(data.map(t => ({
+                id: t.id,
+                name: t.name,
+                date: t.date,
+                category: t.category,
+                amount: t.amount,
+                icon: t.icon
+            })));
+        });
+
+        return () => unsubscribe();
+    }, [user]);
+
+    // Recalculate when transactions or selected month changes
     useEffect(() => {
         calculateFinancials();
-    }, [selectedMonth]);
-
-    // Recalculate when window regains focus (to catch changes from other tabs/components)
-    useEffect(() => {
-        const handleFocus = () => {
-            calculateFinancials();
-        };
-
-        window.addEventListener('focus', handleFocus);
-
-        // Also listen for storage events (changes from other tabs)
-        const handleStorage = (e: StorageEvent) => {
-            if (e.key === 'transactions') {
-                calculateFinancials();
-            }
-        };
-
-        window.addEventListener('storage', handleStorage);
-
-        // Listen for custom storage change events (same tab updates)
-        const handleCustomStorage = () => {
-            calculateFinancials();
-        };
-
-        window.addEventListener('localStorageUpdated', handleCustomStorage);
-
-        // Poll for changes every 2 seconds to catch same-tab updates
-        const pollInterval = setInterval(() => {
-            calculateFinancials();
-        }, 2000);
-
-        // Initial calculation
-        calculateFinancials();
-
-        return () => {
-            window.removeEventListener('focus', handleFocus);
-            window.removeEventListener('storage', handleStorage);
-            window.removeEventListener('localStorageUpdated', handleCustomStorage);
-            clearInterval(pollInterval);
-        };
-    }, [selectedMonth]);
+    }, [transactions, selectedMonth]);
 
     const calculateFinancials = () => {
-        // Load transactions from localStorage
-        const loadedTransactions = localStorage.getItem('transactions');
-        const transactions: Transaction[] = loadedTransactions ? JSON.parse(loadedTransactions) : [];
-
         // Get selected month index
         const monthIndex = months.indexOf(selectedMonth);
         const currentYear = new Date().getFullYear();
@@ -94,9 +74,10 @@ const BalanceCard = () => {
         let totalExpense = 0;
 
         monthTransactions.forEach(transaction => {
-            if (transaction.type === 'income' || transaction.amount > 0) {
-                totalIncome += Math.abs(transaction.amount);
-            } else if (transaction.type === 'expense' || transaction.amount < 0) {
+            // Positive amounts are income, negative are expenses
+            if (transaction.amount > 0) {
+                totalIncome += transaction.amount;
+            } else {
                 totalExpense += Math.abs(transaction.amount);
             }
         });

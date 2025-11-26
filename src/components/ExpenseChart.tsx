@@ -1,41 +1,56 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts';
 import { ChevronDown } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { subscribeToTransactions } from '../lib/firestoreService';
 
 type ViewType = 'Weekly' | 'Monthly';
 
 interface Transaction {
-    id: number;
+    id: string;
     name: string;
     amount: number;
     category: string;
     date: string;
-    type?: 'income' | 'expense';
+    icon: string;
 }
 
 const ExpenseChart: React.FC = () => {
+    const { user } = useAuth();
     const [view, setView] = useState<ViewType>('Weekly');
     const [showDropdown, setShowDropdown] = useState(false);
     const [chartData, setChartData] = useState<any[]>([]);
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+
+    // Subscribe to Firestore transactions
+    useEffect(() => {
+        if (!user) return;
+
+        const userId = user.uid;
+        const unsubscribe = subscribeToTransactions(userId, (data) => {
+            setTransactions(data.map(t => ({
+                id: t.id,
+                name: t.name,
+                date: t.date,
+                category: t.category,
+                amount: t.amount,
+                icon: t.icon
+            })));
+        });
+
+        return () => unsubscribe();
+    }, [user]);
 
     useEffect(() => {
-        // Load transactions from localStorage
-        const loadedTransactions = localStorage.getItem('transactions');
-        const transactions: Transaction[] = loadedTransactions ? JSON.parse(loadedTransactions) : [];
-
-        // Filter only expense transactions
-        const expenses = transactions.filter(t => {
-            // If type is explicitly set, use it; otherwise assume negative amounts are expenses
-            if (t.type) return t.type === 'expense';
-            return t.amount < 0;
-        });
+        // Filter only expense transactions (negative amounts)
+        const expenses = transactions.filter(t => t.amount < 0);
 
         if (view === 'Weekly') {
             setChartData(calculateWeeklyData(expenses));
         } else {
             setChartData(calculateMonthlyData(expenses));
         }
-    }, [view]);
+    }, [view, transactions]);
 
     const calculateWeeklyData = (expenses: Transaction[]) => {
         const today = new Date();
