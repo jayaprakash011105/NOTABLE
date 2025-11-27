@@ -27,7 +27,7 @@ const Login = () => {
             } else {
                 await signup(email, password, displayName);
             }
-            navigate('/dashboard');
+            navigate('/');
         } catch (err: any) {
             setLocalError(err.message);
         } finally {
@@ -42,7 +42,7 @@ const Login = () => {
 
         try {
             await loginWithGoogle();
-            navigate('/dashboard');
+            navigate('/');
         } catch (err: any) {
             setLocalError(err.message);
         } finally {
@@ -57,7 +57,7 @@ const Login = () => {
 
         try {
             await loginWithApple();
-            navigate('/dashboard');
+            navigate('/');
         } catch (err: any) {
             setLocalError(err.message);
         } finally {
