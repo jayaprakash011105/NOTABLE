@@ -19,37 +19,14 @@ const SplashScreen = () => {
             clearTimeout(fadeTimer);
             clearTimeout(hideTimer);
         };
-        ```
-import { useEffect, useState } from 'react';
-
-const SplashScreen = () => {
-    const [isVisible, setIsVisible] = useState(true);
-    const [fadeOut, setFadeOut] = useState(false);
-
-    useEffect(() => {
-        // Start fade-out after 2.5 seconds
-        const fadeTimer = setTimeout(() => {
-            setFadeOut(true);
-        }, 2500);
-
-        // Remove splash screen after fade-out completes
-        const hideTimer = setTimeout(() => {
-            setIsVisible(false);
-        }, 3000);
-
-        return () => {
-            clearTimeout(fadeTimer);
-            clearTimeout(hideTimer);
-        };
     }, []);
 
     if (!isVisible) return null;
 
     return (
         <div
-            className={`fixed inset - 0 z - 50 flex flex - col items - center justify - center bg - white dark: bg - black transition - opacity duration - 500 ${
-            fadeOut ? 'opacity-0' : 'opacity-100'
-        } `}
+            className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-white dark:bg-black transition-opacity duration-500 ${fadeOut ? 'opacity-0' : 'opacity-100'
+                }`}
         >
             {/* Logo with subtle fade-in */}
             <div className="animate-fade-in mb-8">
@@ -77,4 +54,3 @@ const SplashScreen = () => {
 };
 
 export default SplashScreen;
-```
