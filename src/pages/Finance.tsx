@@ -393,7 +393,11 @@ const Finance = () => {
                                 <div className="flex items-end justify-between">
                                     <div>
                                         <p className="text-xs opacity-75">**** **** **** 5248</p>
-                                        <p className="text-sm font-semibold mt-1">Jaya Prakash</p>
+                                        <p className="text-sm font-semibold mt-1">
+                                            {user?.displayName || user?.email?.split('@')[0]?.split('.').map(word =>
+                                                word.charAt(0).toUpperCase() + word.slice(1)
+                                            ).join(' ') || 'Card Holder'}
+                                        </p>
                                     </div>
                                     <div className="text-right">
                                         <p className="text-xs opacity-75">Exp 07/28</p>
