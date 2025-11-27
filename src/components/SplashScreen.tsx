@@ -19,44 +19,62 @@ const SplashScreen = () => {
             clearTimeout(fadeTimer);
             clearTimeout(hideTimer);
         };
+        ```
+import { useEffect, useState } from 'react';
+
+const SplashScreen = () => {
+    const [isVisible, setIsVisible] = useState(true);
+    const [fadeOut, setFadeOut] = useState(false);
+
+    useEffect(() => {
+        // Start fade-out after 2.5 seconds
+        const fadeTimer = setTimeout(() => {
+            setFadeOut(true);
+        }, 2500);
+
+        // Remove splash screen after fade-out completes
+        const hideTimer = setTimeout(() => {
+            setIsVisible(false);
+        }, 3000);
+
+        return () => {
+            clearTimeout(fadeTimer);
+            clearTimeout(hideTimer);
+        };
     }, []);
 
     if (!isVisible) return null;
 
     return (
         <div
-            className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 transition-opacity duration-500 ${fadeOut ? 'opacity-0' : 'opacity-100'
-                }`}
+            className={`fixed inset - 0 z - 50 flex flex - col items - center justify - center bg - white dark: bg - black transition - opacity duration - 500 ${
+            fadeOut ? 'opacity-0' : 'opacity-100'
+        } `}
         >
-            {/* Logo with bounce animation */}
-            <div className="animate-bounce-slow mb-6">
+            {/* Logo with subtle fade-in */}
+            <div className="animate-fade-in mb-8">
                 <img
                     src="/logo.png"
                     alt="NOTABLE Logo"
-                    className="w-32 h-32 md:w-40 md:h-40 object-contain drop-shadow-2xl animate-fade-in"
+                    className="w-24 h-24 md:w-32 md:h-32 object-contain opacity-90"
                 />
             </div>
 
-            {/* App Name with slide-up animation */}
-            <div className="animate-slide-up-fade">
-                <h1 className="text-5xl md:text-6xl font-bold text-white mb-2 tracking-tight">
+            {/* App Name with minimal animation */}
+            <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
+                <h1 className="text-4xl md:text-5xl font-bold text-black dark:text-white mb-2 tracking-wider">
                     NOTABLE
                 </h1>
-                <p className="text-lg md:text-xl text-white/90 text-center font-light">
-                    Your Digital Companion
-                </p>
+                <div className="h-0.5 w-full bg-black dark:bg-white mt-2 transform scale-x-0 animate-expand"></div>
             </div>
 
-            {/* Loading indicator */}
-            <div className="mt-12 animate-pulse">
-                <div className="flex gap-2">
-                    <div className="w-3 h-3 bg-white rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                    <div className="w-3 h-3 bg-white rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                    <div className="w-3 h-3 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                </div>
-            </div>
+            {/* Minimalist tagline */}
+            <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 mt-6 font-light tracking-wide animate-fade-in" style={{ animationDelay: '0.4s' }}>
+                Your Digital Companion
+            </p>
         </div>
     );
 };
 
 export default SplashScreen;
+```

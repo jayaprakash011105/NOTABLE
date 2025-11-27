@@ -141,4 +141,18 @@
   .animate-slide-up-fade {
     animation: slide-up-fade 0.8s ease-out;
   }
+
+  @keyframes expand {
+    from {
+      transform: scaleX(0);
+    }
+
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  .animate-expand {
+    animation: expand 0.6s ease-out 0.4s forwards;
+  }
 }
