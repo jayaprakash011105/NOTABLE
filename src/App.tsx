@@ -31,168 +31,98 @@ function App() {
     return () => clearTimeout(timer);
   }, []);
 
+  if (showSplash) {
+    return <SplashScreen />;
+  }
+
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <div className="relative min-h-screen">
-                <Dashboard />
-                <BottomNav />
-              </div>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/finance"
-          element={
-            <ProtectedRoute>
-              <div className="relative min-h-screen">
-                <Finance />
-                <BottomNav />
-              </div>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/tasks"
-          element={
-            <ProtectedRoute>
-              <div className="relative min-h-screen">
-                <Tasks />
-                <BottomNav />
-              </div>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/notes"
-          element={
-            <ProtectedRoute>
-              <div className="relative min-h-screen">
-                <Notes />
-                <BottomNav />
-              </div>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/health"
-          element={
-            <ProtectedRoute>
-              <div className="relative min-h-screen">
-                <Health />
-                <BottomNav />
-              </div>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <div className="relative min-h-screen">
-                <Profile />
-                <BottomNav />
-              </div>
-            </ProtectedRoute>
-          }
-        />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-      <ErrorBoundary>
-        <ThemeProvider>
-          <LanguageProvider>
-            <CurrencyProvider>
-              <UserProvider>
-                <NotificationProvider>
-                  <AuthProvider>
-                    <BrowserRouter>
-                      {showSplash && <SplashScreen />}
-                      {!showSplash && (
-                        <Routes>
-                          <Route path="/login" element={<Login />} />
-                          <Route
-                            path="/"
-                            element={
-                              <ProtectedRoute>
-                                <div className="relative min-h-screen">
-                                  <Dashboard />
-                                  <BottomNav />
-                                </div>
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/finance"
-                            element={
-                              <ProtectedRoute>
-                                <div className="relative min-h-screen">
-                                  <Finance />
-                                  <BottomNav />
-                                </div>
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/tasks"
-                            element={
-                              <ProtectedRoute>
-                                <div className="relative min-h-screen">
-                                  <Tasks />
-                                  <BottomNav />
-                                </div>
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/notes"
-                            element={
-                              <ProtectedRoute>
-                                <div className="relative min-h-screen">
-                                  <Notes />
-                                  <BottomNav />
-                                </div>
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/health"
-                            element={
-                              <ProtectedRoute>
-                                <div className="relative min-h-screen">
-                                  <Health />
-                                  <BottomNav />
-                                </div>
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/profile"
-                            element={
-                              <ProtectedRoute>
-                                <div className="relative min-h-screen">
-                                  <Profile />
-                                  <BottomNav />
-                                </div>
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route path="*" element={<Navigate to="/" replace />} />
-                        </Routes>
-                      )}
-                    </BrowserRouter>
-                  </AuthProvider>
-                </NotificationProvider>
-              </UserProvider>
-            </CurrencyProvider>
-          </LanguageProvider>
-        </ThemeProvider>
-      </ErrorBoundary>
-      );
+    <ErrorBoundary>
+      <ThemeProvider>
+        <LanguageProvider>
+          <CurrencyProvider>
+            <UserProvider>
+              <NotificationProvider>
+                <AuthProvider>
+                  <BrowserRouter>
+                    <Routes>
+                      <Route path="/login" element={<Login />} />
+                      <Route
+                        path="/"
+                        element={
+                          <ProtectedRoute>
+                            <div className="relative min-h-screen">
+                              <Dashboard />
+                              <BottomNav />
+                            </div>
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/finance"
+                        element={
+                          <ProtectedRoute>
+                            <div className="relative min-h-screen">
+                              <Finance />
+                              <BottomNav />
+                            </div>
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/tasks"
+                        element={
+                          <ProtectedRoute>
+                            <div className="relative min-h-screen">
+                              <Tasks />
+                              <BottomNav />
+                            </div>
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/notes"
+                        element={
+                          <ProtectedRoute>
+                            <div className="relative min-h-screen">
+                              <Notes />
+                              <BottomNav />
+                            </div>
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/health"
+                        element={
+                          <ProtectedRoute>
+                            <div className="relative min-h-screen">
+                              <Health />
+                              <BottomNav />
+                            </div>
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/profile"
+                        element={
+                          <ProtectedRoute>
+                            <div className="relative min-h-screen">
+                              <Profile />
+                              <BottomNav />
+                            </div>
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route path="*" element={<Navigate to="/" replace />} />
+                    </Routes>
+                  </BrowserRouter>
+                </AuthProvider>
+              </NotificationProvider>
+            </UserProvider>
+          </CurrencyProvider>
+        </LanguageProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
+  );
 }
 
-      export default App;
+export default App;
