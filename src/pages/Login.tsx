@@ -16,6 +16,56 @@ const Login = () => {
     const navigate = useNavigate();
 
     const handleSubmit = async (e: FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setLocalError('');
+        clearError();
+
+        try {
+            if (isLogin) {
+                await login(email, password);
+            } else {
+                await signup(email, password, displayName);
+            }
+            navigate('/dashboard');
+        } catch (err: any) {
+            setLocalError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleGoogleLogin = async () => {
+        setLoading(true);
+        setLocalError('');
+        clearError();
+
+        try {
+            await loginWithGoogle();
+            navigate('/dashboard');
+        } catch (err: any) {
+            setLocalError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleAppleLogin = async () => {
+        setLoading(true);
+        setLocalError('');
+        clearError();
+
+        try {
+            await loginWithApple();
+            navigate('/dashboard');
+        } catch (err: any) {
+            setLocalError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const toggleMode = () => {
         setIsLogin(!isLogin);
         setLocalError('');
         clearError();

@@ -6,7 +6,19 @@ import LoadingSpinner from './LoadingSpinner';
 interface ProtectedRouteProps {
     children: ReactNode;
 }
-return <>{children}</>;
+
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+    const { user, loading } = useAuth();
+
+    if (loading) {
+        return <LoadingSpinner />;
+    }
+
+    if (!user) {
+        return <Navigate to="/login" replace />;
+    }
+
+    return <>{children}</>;
 };
 
 export default ProtectedRoute;
