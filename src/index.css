@@ -108,4 +108,57 @@
   .animate-slide-down {
     animation: slideDown 0.3s ease-out;
   }
+
+  /* Splash screen animations */
+  @keyframes splash {
+    0% {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes logoBounce {
+
+    0%,
+    100% {
+      transform: translateY(0) scale(1);
+    }
+
+    50% {
+      transform: translateY(-10px) scale(1.05);
+    }
+  }
+
+  @keyframes textFadeUp {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-splash {
+    animation: splash 0.6s ease-out;
+  }
+
+  .animate-logo-bounce {
+    animation: logoBounce 1.5s ease-in-out infinite;
+  }
+
+  .animate-text-fade-up {
+    animation: textFadeUp 0.8s ease-out 0.3s both;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
 }
